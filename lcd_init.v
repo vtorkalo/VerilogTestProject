@@ -1,7 +1,7 @@
 module lcd_init(
   input CLK,
   input sendText,
-  reg line,
+  input line,
   input [8*16:1] text,  
   output [4:0] LCD_D,
   output LCD_E,
@@ -34,15 +34,8 @@ reg[4:0] initStep = 0;
 
 reg sendCommandReg = 0;
 
-assign sendCommandWire = sendCommandReg & isSending;
 
 localparam rs1 = 5'b10000;
-
-reg [7:0] x;
-initial
-begin
-   x = "x";
-end
 
 
 reg [5:0] currentChar = 0;
@@ -104,6 +97,7 @@ begin
        initState <= INIT_IN_PROGRESS;
        initStep <= 0;       
     end
+    currentChar <= 0;
     getNextCommand <= 1;
   end
     
@@ -120,8 +114,7 @@ begin
      
      getNextCommand <= 0;          
      sendCommandReg <= 1;   
-  end
- 
+  end 
 
   if (commandDone)
   begin     
@@ -145,13 +138,13 @@ begin
            getNextCommand <= 1;
            currentHalf <= ~currentHalf;
         end
-        if (currentHalf == 0 & currentChar < 16)
+        if (currentHalf == 0 & currentChar < 15)
         begin
            currentChar <= currentChar + 1;
            getNextCommand <= 1;
            currentHalf <= ~currentHalf;
         end
-        if (currentHalf == 0 & currentChar > 16)
+        if (currentHalf == 0 & currentChar == 15)
         begin
            d0 <= d0 + 1;
            isSending <= 0;
@@ -168,5 +161,5 @@ wire commandDone;
 
 wire sendCommandWire;
 
-lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommandWire), .command(currentCommand), .commandDelay(currentDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
+lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommandReg), .command(currentCommand), .commandDelay(currentDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
 endmodule
