@@ -23,7 +23,7 @@ assign button3 = buttons[2];
 wire button4;
 assign button = buttons[3];
 
-
+wire button1Up, button2Up, button3Up, button4Up;
 
 reg sendText_trig = 0;
 
@@ -31,17 +31,27 @@ assign sendTextWire = button1Up;
 
 always @(posedge CLK)
 begin
+   if (sendText_trig)
+   begin   
+   sendText_trig <= 0;
+     
+   end
    if (button1Up)
    begin
       sendText_trig <= 1; 
    end
+   
    if (button2Up)
    begin
-      LED <= ~LED;
+
    end
-   
-   units <= d0;   
+   units <= d0;
+
+
 end
+
+
+
 
 debouncer deb_1 (.CLK(CLK), .switch_input(button1), .trans_up(button1Up));
 debouncer deb_2 (.CLK(CLK), .switch_input(button2), .trans_up(button2Up));
@@ -63,7 +73,7 @@ display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(tho
 
 wire sendTextWire;
 
-lcd_init init(.CLK(CLK), 
+lcd_init lcd_init(.CLK(CLK), 
    .sendText(sendTextWire),
    .text("Hello World!    "),   
    .LCD_D(LCD_D),

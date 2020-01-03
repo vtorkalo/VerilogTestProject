@@ -34,6 +34,7 @@ reg[4:0] initStep = 0;
 reg sendCommandReg = 0;
 
 assign sendCommandWire = sendCommandReg & isSending;
+
 localparam rs1 = 5'b10000;
 
 reg [7:0] x;
@@ -41,6 +42,10 @@ initial
 begin
    x = "x";
 end
+
+
+reg [5:0] currentChar = 0;
+reg currentHalf = 1;
 
 reg getNextCommand = 0;
 
@@ -74,37 +79,93 @@ begin
 end
 endtask
 
+
+task getNextTextCommandTask;
+begin
+  if (currentHalf)
+  begin // high half
+   //  currentCommand <= rs1 + text[(currentChar * 8)+:4];
+     currentCommand <= rs1 + x[7:4];
+     currentDelay <= t10us;
+  end else
+  begin
+      currentCommand <= rs1 + x[3:0];
+     //currentCommand <= rs1 + text[(currentChar * 8 + 3)+:4];
+     currentDelay <= t53us;
+  end  
+end
+endtask
+
+
 always @(posedge CLK)
 begin
   if (sendText)
-  begin   
+  begin 
+    currentHalf <= 1;
     isSending <= 1;
     if (initState == NOT_INIT)
+    begin
        initState <= INIT_IN_PROGRESS;
-       
-    initStep <= 0;
+       initStep <= 0;       
+    end
     getNextCommand <= 1;
   end
     
-  if (initState == INIT_IN_PROGRESS & getNextCommand)
+  if (getNextCommand)
   begin
-     getNextCommandTask;
+     if (initState == INIT_IN_PROGRESS)
+     begin
+        getNextCommandTask;
+     end
+     if (initState == DONE)
+     begin
+        getNextTextCommandTask;
+     end
+     
      getNextCommand <= 0;          
      sendCommandReg <= 1;   
   end
+ 
 
   if (commandDone)
   begin     
      sendCommandReg <= 0;
      if (initState <= INIT_IN_PROGRESS)
      begin
-        if (initStep == 15) initState <= DONE; else
-       begin
-          initStep <= initStep + 1;
-          getNextCommand <= 1;
-       end
+        if (initStep == 15) 
+        begin
+           initState <= DONE; 
+        end else
+        begin
+           initStep <= initStep + 1;          
+        end
+       getNextCommand <= 1;
      end     
+     
+     if (initState == DONE)
+     begin
+        if (currentHalf == 1)
+        begin
+           getNextCommand <= 1;
+           currentHalf <= ~currentHalf;
+        end
+        if (currentHalf == 0 & currentChar < 16)
+        begin
+           currentChar <= currentChar + 1;
+           getNextCommand <= 1;
+           currentHalf <= ~currentHalf;
+        end
+        if (currentHalf == 0 & currentChar > 16)
+        begin
+           d0 <= d0 + 1;
+           isSending <= 0;
+           getNextCommand <= 0;  
+           sendingDone <= 1;
+        end             
+     end
   end
+         
+  
 end
 
 wire commandDone;
