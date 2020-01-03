@@ -1,7 +1,8 @@
 module lcd_init(
   input CLK,
   input sendText,
-  input [8*16:0] text,  
+  reg line,
+  input [8*16:1] text,  
   output [4:0] LCD_D,
   output LCD_E,
   output reg sendingDone,  
@@ -71,10 +72,7 @@ begin
      11: begin  currentCommand <= 5'b00110;  currentDelay <= t53us;   end// entry mode sed id and s
         
      12: begin  currentCommand <= 5'b00000;  currentDelay <= t10us;   end
-     13: begin  currentCommand <= 5'b01100;  currentDelay <= t53us;   end// set blink cursor display on off control set d=1 b and c      
-     
-     14: begin  currentCommand <= rs1 + x[7:4];  currentDelay <= t10us;   end
-     15: begin  currentCommand <= rs1 + x[3:0];  currentDelay <= t53us;   end//set blink cursor display on off control set d=1 b and c      
+     13: begin  currentCommand <= 5'b01100;  currentDelay <= t53us;   end// set blink cursor display on off control set d=1 b and c           
   endcase
 end
 endtask
@@ -83,14 +81,12 @@ endtask
 task getNextTextCommandTask;
 begin
   if (currentHalf)
-  begin // high half
-   //  currentCommand <= rs1 + text[(currentChar * 8)+:4];
-     currentCommand <= rs1 + x[7:4];
+  begin
+     currentCommand <= rs1 + text[( (16-currentChar-1)*8+5 ) +:4];
      currentDelay <= t10us;
   end else
-  begin
-      currentCommand <= rs1 + x[3:0];
-     //currentCommand <= rs1 + text[(currentChar * 8 + 3)+:4];
+  begin  
+     currentCommand <= rs1 + text[((16-currentChar-1)*8+1) +:4];
      currentDelay <= t53us;
   end  
 end
@@ -132,7 +128,7 @@ begin
      sendCommandReg <= 0;
      if (initState <= INIT_IN_PROGRESS)
      begin
-        if (initStep == 15) 
+        if (initStep == 13) 
         begin
            initState <= DONE; 
         end else

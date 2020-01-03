@@ -29,8 +29,23 @@ reg sendText_trig = 0;
 
 assign sendTextWire = button1Up;
 
+
+reg [8*2:1] char_value;
+
+initial
+begin
+//0111 1000 -x
+//0110 1111 -0
+char_value = "xo";
+end
+
 always @(posedge CLK)
 begin
+   units <= char_value[1];
+   tens <= char_value[2];
+   hundreds <= char_value[3];
+   thousands <= char_value[4];
+
    if (sendText_trig)
    begin   
    sendText_trig <= 0;
@@ -45,7 +60,7 @@ begin
    begin
 
    end
-   units <= d0;
+   //units <= d0;
 
 
 end
@@ -75,7 +90,7 @@ wire sendTextWire;
 
 lcd_init lcd_init(.CLK(CLK), 
    .sendText(sendTextWire),
-   .text("Hello World!    "),   
+   .text("0123456789123456"),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
    .sendingDone(sendingDone),   
