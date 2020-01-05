@@ -20,10 +20,8 @@ localparam t100us = t1_uS * 100;
 localparam t3ms = t1_uS * 3000;
 localparam t4_1ms = t1_uS * 4100;
 
-
 reg [4:0] currentCommand = 0;
 reg [20:0] currentDelay = 0;
-
 
 reg isSending = 0;
 
@@ -33,12 +31,9 @@ reg[1:0] initState = NOT_INIT;
 reg[4:0] initStep = 0;
 
 reg sendCommandReg = 0;
-
-
 localparam rs1 = 5'b10000;
 
-
-reg [5:0] currentChar = 0;
+reg [5:0] currentChar = 1;
 reg currentHalf = 1;
 
 reg getNextCommand = 0;
@@ -71,52 +66,46 @@ end
 endtask
 
 wire [8:0] lowHalfStartIndex, highHalfStartIndex;
-assign lowHalfStartIndex = (TEXT_LENGTH-currentChar-1)*8+1;
-assign highHalfStartIndex = (TEXT_LENGTH-currentChar-1)*8+5;
+assign lowHalfStartIndex = (TEXT_LENGTH-currentChar)*8+1;
+assign highHalfStartIndex = (TEXT_LENGTH-currentChar)*8+5;
+
 
 task getNextTextCommandTask;
 begin
-  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar == 0)
+  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar == 1)
   begin  
-    if (currentHalf)
-     begin
-        d0<= d0 + 1;
-        currentCommand <= 5'b01000;        
-        currentDelay <= t10us*2;
-     end else
-     begin  
+    if (currentHalf)        
+        currentCommand <= 5'b01000;             
+     else     
         currentCommand <= 5'b00000;        
-        currentDelay <= t53us*2;
-     end      
   end else
-  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar > 0)
+  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar > 1)
   begin
     if (currentHalf)
-     begin
         currentCommand <= 5'b01100;        
-        currentDelay <= t10us;
-     end else
-     begin  
+    else
         currentCommand <= 5'b00000;
-        currentDelay <= t53us;
-     end      
-  end
+  end else
+  if (currentHalf)
+     currentCommand <= rs1 + text[highHalfStartIndex +:4];
   else
-     if (currentHalf)
-     begin
-        currentCommand <= rs1 + text[highHalfStartIndex +:4];
-        currentDelay <= t10us;
-     end else
-     begin  
-        currentCommand <= rs1 + text[lowHalfStartIndex +:4];
-        currentDelay <= t53us;
-     end  
+     currentCommand <= rs1 + text[lowHalfStartIndex +:4];
+     
+   if (currentHalf)   
+      currentDelay <= t10us;
+   else
+      currentDelay <= t53us;      
 end
 endtask
 
 
 always @(posedge CLK)
 begin
+  if (sendCommandReg)
+  begin  
+     sendCommandReg <= 0;
+  end
+
   if (sendText)
   begin 
     currentHalf <= 1;
@@ -126,11 +115,11 @@ begin
        initState <= INIT_IN_PROGRESS;
        initStep <= 0;       
     end
-    currentChar <= 0;
+    currentChar <= 1;
     getNextCommand <= 1;
   end
     
-  if (getNextCommand)
+  if (getNextCommand & isSending)
   begin
      if (initState == INIT_IN_PROGRESS)
      begin
@@ -144,10 +133,7 @@ begin
      getNextCommand <= 0;          
      sendCommandReg <= 1;   
   end
-  if (sendCommandReg)
-  begin  
-     sendCommandReg <= 0;
-  end
+
 
   if (commandDone)
   begin     
@@ -166,32 +152,24 @@ begin
      
      if (initState == DONE)
      begin
-        currentHalf <= ~currentHalf;
-        if (currentHalf == 1)
-        begin
-           getNextCommand <= 1;           
-        end
-        if (currentHalf == 0 & currentChar < TEXT_LENGTH - 1)
+        currentHalf <= ~currentHalf;        
+        getNextCommand <= currentHalf;        
+        
+        if (~currentHalf & currentChar < TEXT_LENGTH)
         begin
            currentChar <= currentChar + 1;
            getNextCommand <= 1;           
         end
-        if (currentHalf == 0 & currentChar == TEXT_LENGTH - 1)
+        if (currentHalf == 0 & currentChar == TEXT_LENGTH)
         begin
            isSending <= 0;
-           getNextCommand <= 0;  
            sendingDone <= 1;
-           sendCommandReg <= 0;   
         end             
      end
-  end
-         
-  
+  end  
 end
 
 wire commandDone;
-
-wire sendCommandWire;
 
 lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommandReg), .command(currentCommand), .commandDelay(currentDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
 endmodule
