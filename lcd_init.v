@@ -7,15 +7,15 @@ module lcd_init(
   output reg sendingDone
 );
 
-localparam TEXT_LENGTH = 34;
+localparam TEXT_LENGTH = 6'd34;
 localparam  FREQ = 50000000;
 
-localparam [20:0] t1_uS = FREQ / 1000000;
-localparam [20:0] t10us = t1_uS * 10; 
-localparam [20:0] t53us = t1_uS * 53;
-localparam [20:0] t100us = t1_uS * 100;  
-localparam [20:0] t3ms = t1_uS * 3000;
-localparam [20:0] t4_1ms = t1_uS * 4100;
+localparam [20:0] t1_uS = FREQ / 20'd1000000;
+localparam [20:0] t10us = t1_uS * 4'd10; 
+localparam [20:0] t53us = t1_uS * 6'd53;
+localparam [20:0] t100us = t1_uS * 7'd100;  
+localparam [20:0] t3ms = t1_uS * 13'd3000;
+localparam [20:0] t4_1ms = t1_uS * 13'd4100;
 
 localparam [4:0] rs1 = 5'b10000;
 
@@ -62,8 +62,8 @@ end
 endtask
 
 wire [8:0] lowHalfStartIndex, highHalfStartIndex;
-assign lowHalfStartIndex = (TEXT_LENGTH-currentChar)*8+1'b1;
-assign highHalfStartIndex = (TEXT_LENGTH-currentChar)*8+5;
+assign lowHalfStartIndex = (TEXT_LENGTH-currentChar) * 4'd8 + 1'b1;
+assign highHalfStartIndex = (TEXT_LENGTH-currentChar) * 4'd8 + 4'd5;
 
 reg line = 0;
 

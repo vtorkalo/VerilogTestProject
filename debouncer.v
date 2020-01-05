@@ -29,7 +29,7 @@ begin
   end
   else
   begin
-    count <= count + 1;
+    count <= count + 1'b1;
 	 if (finished)
 	 begin
 	   state <= ~state;
