@@ -82,11 +82,11 @@ begin
      begin
         d0<= d0 + 1;
         currentCommand <= 5'b01000;        
-        currentDelay <= t10us;
+        currentDelay <= t10us*2;
      end else
      begin  
         currentCommand <= 5'b00000;        
-        currentDelay <= t53us;
+        currentDelay <= t53us*2;
      end      
   end else
   if (text[lowHalfStartIndex +: 8] == "\n" & currentChar > 0)
@@ -143,12 +143,16 @@ begin
      
      getNextCommand <= 0;          
      sendCommandReg <= 1;   
-  end 
+  end
+  if (sendCommandReg)
+  begin  
+     sendCommandReg <= 0;
+  end
 
   if (commandDone)
   begin     
      sendCommandReg <= 0;
-     if (initState <= INIT_IN_PROGRESS)
+     if (initState == INIT_IN_PROGRESS)
      begin
         if (initStep == 13) 
         begin
@@ -162,22 +166,22 @@ begin
      
      if (initState == DONE)
      begin
+        currentHalf <= ~currentHalf;
         if (currentHalf == 1)
         begin
-           getNextCommand <= 1;
-           currentHalf <= ~currentHalf;
+           getNextCommand <= 1;           
         end
         if (currentHalf == 0 & currentChar < TEXT_LENGTH - 1)
         begin
            currentChar <= currentChar + 1;
-           getNextCommand <= 1;
-           currentHalf <= ~currentHalf;
+           getNextCommand <= 1;           
         end
         if (currentHalf == 0 & currentChar == TEXT_LENGTH - 1)
         begin
            isSending <= 0;
            getNextCommand <= 0;  
            sendingDone <= 1;
+           sendCommandReg <= 0;   
         end             
      end
   end

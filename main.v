@@ -61,18 +61,11 @@ begin
      
    end
    if (button1Up)
-   begin
-      sendText_trig <= 1; 
-       sendText_trig <= 1; 
-        textFlag <= ~textFlag;
-       if (textFlag)
-      begin
-         text <="\nabcdefghijklmnop\nqrstuvwxyz123456";
-      end
-      else
-      begin
-         text <="\n0123456789123456\n0123456789123456";
-      end
+   begin      
+      textFlag <= ~textFlag;
+      if (textFlag)
+         text <="\nabcdefghijklmnop\nqrstuvwxyz123456"; else
+       text <="\n0123456789123456\n0123456789123456";
    end
    
    if (button2Up)
@@ -80,7 +73,7 @@ begin
 
    end
    
-   if (prescaler == 50000000)
+   if (prescaler == 5000000)
    begin
       prescaler <= 0;
       ledstate <= ~ledstate;
