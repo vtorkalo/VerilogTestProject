@@ -2,14 +2,14 @@ module lcd_init(
   input CLK,
   input sendText,
   input line,
-  input [8*16:1] text,  
+  input [8 * TEXT_LENGTH : 1] text,  
   output [4:0] LCD_D,
   output LCD_E,
   output reg sendingDone,  
   output reg [3:0] d0
 );
 
-
+localparam TEXT_LENGTH = 33;
 localparam FREQ = 50000000;
 localparam t1_uS = FREQ / 1000000;
 localparam t10us = t1_uS * 10;
@@ -70,18 +70,34 @@ begin
 end
 endtask
 
+wire [8:0] lowHalfStartIndex, highHalfStartIndex;
+assign lowHalfStartIndex = (TEXT_LENGTH-currentChar-1)*8+1;
+assign highHalfStartIndex = (TEXT_LENGTH-currentChar-1)*8+5;
 
 task getNextTextCommandTask;
 begin
-  if (currentHalf)
+  if (text[lowHalfStartIndex +: 8] == "\n")
   begin
-     currentCommand <= rs1 + text[( (16-currentChar-1)*8+5 ) +:4];
-     currentDelay <= t10us;
-  end else
-  begin  
-     currentCommand <= rs1 + text[((16-currentChar-1)*8+1) +:4];
-     currentDelay <= t53us;
-  end  
+    if (currentHalf)
+     begin
+        currentCommand <= 5'b01100;
+        currentDelay <= t10us;
+     end else
+     begin  
+        currentCommand <= 5'b00000;
+        currentDelay <= t53us;
+     end      
+  end
+  else
+     if (currentHalf)
+     begin
+        currentCommand <= rs1 + text[highHalfStartIndex +:4];
+        currentDelay <= t10us;
+     end else
+     begin  
+        currentCommand <= rs1 + text[lowHalfStartIndex +:4];
+        currentDelay <= t53us;
+     end  
 end
 endtask
 
@@ -138,13 +154,13 @@ begin
            getNextCommand <= 1;
            currentHalf <= ~currentHalf;
         end
-        if (currentHalf == 0 & currentChar < 15)
+        if (currentHalf == 0 & currentChar < TEXT_LENGTH - 1)
         begin
            currentChar <= currentChar + 1;
            getNextCommand <= 1;
            currentHalf <= ~currentHalf;
         end
-        if (currentHalf == 0 & currentChar == 15)
+        if (currentHalf == 0 & currentChar == TEXT_LENGTH - 1)
         begin
            d0 <= d0 + 1;
            isSending <= 0;
