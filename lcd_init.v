@@ -9,7 +9,7 @@ module lcd_init(
   output reg [3:0] d0
 );
 
-localparam TEXT_LENGTH = 33;
+localparam TEXT_LENGTH = 34;
 localparam FREQ = 50000000;
 localparam t1_uS = FREQ / 1000000;
 localparam t10us = t1_uS * 10;
@@ -76,11 +76,24 @@ assign highHalfStartIndex = (TEXT_LENGTH-currentChar-1)*8+5;
 
 task getNextTextCommandTask;
 begin
-  if (text[lowHalfStartIndex +: 8] == "\n")
+  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar == 0)
+  begin  
+    if (currentHalf)
+     begin
+        d0<= d0 + 1;
+        currentCommand <= 5'b01000;        
+        currentDelay <= t10us;
+     end else
+     begin  
+        currentCommand <= 5'b00000;        
+        currentDelay <= t53us;
+     end      
+  end else
+  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar > 0)
   begin
     if (currentHalf)
      begin
-        currentCommand <= 5'b01100;
+        currentCommand <= 5'b01100;        
         currentDelay <= t10us;
      end else
      begin  
@@ -162,7 +175,6 @@ begin
         end
         if (currentHalf == 0 & currentChar == TEXT_LENGTH - 1)
         begin
-           d0 <= d0 + 1;
            isSending <= 0;
            getNextCommand <= 0;  
            sendingDone <= 1;

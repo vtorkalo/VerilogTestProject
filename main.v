@@ -4,7 +4,7 @@ module main(
   
   output [3:0] DIGIT,
   output [7:0] SEG,
-  output reg LED,
+  output LED,
   
   output [4:0] LCD_D,
   output LCD_E
@@ -39,12 +39,21 @@ begin
 char_value = "\n";
 end
 
+reg [8 * 34 : 1] text = "\nabcdefghijklmnop\nqrstuvwxyz123456";
+
+reg [27:0] prescaler;
+reg textFlag = 0;
+reg ledstate = 0;
+
 always @(posedge CLK)
 begin
-   units <= char_value[5];
-   tens <= char_value[6];
-   hundreds <= char_value[7];
-   thousands <= char_value[8];
+   prescaler <= prescaler + 1;
+
+//   units <= char_value[5];
+//   tens <= char_value[6];
+//   hundreds <= char_value[7];
+//   thousands <= char_value[8];
+   
 
    if (sendText_trig)
    begin   
@@ -54,18 +63,41 @@ begin
    if (button1Up)
    begin
       sendText_trig <= 1; 
+       sendText_trig <= 1; 
+        textFlag <= ~textFlag;
+       if (textFlag)
+      begin
+         text <="\nabcdefghijklmnop\nqrstuvwxyz123456";
+      end
+      else
+      begin
+         text <="\n0123456789123456\n0123456789123456";
+      end
    end
    
    if (button2Up)
    begin
 
    end
-   //units <= d0;
+   
+   if (prescaler == 50000000)
+   begin
+      prescaler <= 0;
+      ledstate <= ~ledstate;
+   
+   end
+      
+   
+   
+     
+
+     
+   units <= d0;
 
 
 end
 
-
+assign LED = ledstate;
 
 
 debouncer deb_1 (.CLK(CLK), .switch_input(button1), .trans_up(button1Up));
@@ -90,7 +122,7 @@ wire sendTextWire;
 
 lcd_init lcd_init(.CLK(CLK), 
    .sendText(sendTextWire),
-   .text("abcdefghijklmnop\nqrstuvwxyz123456"),   
+   .text(text),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
    .sendingDone(sendingDone),   
