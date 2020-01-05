@@ -66,16 +66,21 @@ wire [8:0] lowHalfStartIndex, highHalfStartIndex;
 assign lowHalfStartIndex = (TEXT_LENGTH-currentChar)*8+1;
 assign highHalfStartIndex = (TEXT_LENGTH-currentChar)*8+5;
 
+reg line = 0;
+
 task getNextTextCommandTask;
 begin
-  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar == 1)
+  if (text[lowHalfStartIndex +: 8] == "\n" & line == 0)
   begin  
     if (highNibble)        
         currentCommand <= 5'b01000; //set cursor at 1st line beginning
      else
+     begin
         currentCommand <= 5'b00000;
+        line <= 1;
+     end
   end else
-  if (text[lowHalfStartIndex +: 8] == "\n" & currentChar > 1)
+  if (text[lowHalfStartIndex +: 8] == "\n" & line == 1)
   begin
     if (highNibble)
         currentCommand <= 5'b01100; //set cursor at 2nd line beginning
@@ -95,8 +100,9 @@ end
 endtask
 
 
-wire ifTakeNewChar = ~highNibble & currentChar < TEXT_LENGTH;
+wire takeNewChar = ~highNibble & currentChar < TEXT_LENGTH;
 wire isLastTransfer = highNibble == 0 & currentChar == TEXT_LENGTH;
+wire isLastInitStep = initStep == 13;
 
 always @(posedge CLK)
 begin
@@ -109,13 +115,15 @@ begin
   begin 
     highNibble <= 1;
     isSending <= 1;
+    currentChar <= 1;
+    getNextCommand <= 1;
+    line <= 0;
+    
     if (initState == NOT_INIT)
     begin
        initState <= INIT_IN_PROGRESS;
-       initStep <= 0;       
+       initStep <= 0;
     end
-    currentChar <= 1;
-    getNextCommand <= 1;
   end
     
   if (getNextCommand & isSending)
@@ -139,17 +147,16 @@ begin
      if (initState == INIT_IN_PROGRESS)
      begin
         getNextCommand <= 1;
-        if (initStep == 13) 
+        if (isLastInitStep) 
            initState <= DONE; 
         else
            initStep <= initStep + 1;
-     end
-     
+     end else     
      if (initState == DONE)
      begin
         highNibble <= ~highNibble;
-        getNextCommand <= highNibble | ifTakeNewChar;
-        currentChar <= currentChar + ifTakeNewChar;
+        getNextCommand <= highNibble | takeNewChar;
+        currentChar <= currentChar + takeNewChar;
         isSending <= ~isLastTransfer;
         sendingDone <= isLastTransfer;        
      end
