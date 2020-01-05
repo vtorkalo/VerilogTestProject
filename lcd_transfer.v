@@ -8,6 +8,13 @@ module lcd_transfer(
   output reg commandDone
 );
 
+localparam FREQ = 50000000;
+localparam t1_uS = FREQ / 1000000;
+
+localparam E_CLOCK_TIME = t1_uS * 3;
+localparam RAISE_TIME = t1_uS * 1;
+localparam FALL_TIME = t1_uS * 1;
+
 reg [7:0] e_timer;
 reg e_timer_en;
 
@@ -99,16 +106,7 @@ begin
 end
 endtask
 
-reg currentCommand = 0;
 reg isSending = 0;
-
-localparam FREQ = 50000000;
-localparam t1_uS = FREQ / 1000000;
-
-localparam E_CLOCK_TIME = t1_uS * 3;
-localparam RAISE_TIME = t1_uS * 1;
-localparam FALL_TIME = t1_uS * 1;
-
 reg [4:0] commandReg;
 reg [20:0] commandDelayReg;
 reg setDataBusFlag = 0;

@@ -21,7 +21,7 @@ wire button3;
 assign button3 = buttons[2];
 
 wire button4;
-assign button = buttons[3];
+assign button4 = buttons[3];
 
 wire button1Up, button2Up, button3Up, button4Up;
 
@@ -39,7 +39,7 @@ reg ledstate = 0;
 
 always @(posedge CLK)
 begin
-   prescaler <= prescaler + 1;
+   prescaler <= prescaler + 1'b1;
 
    if (sendText_trig)
    begin   
@@ -66,14 +66,7 @@ begin
    
    end
       
-   
-   
-     
-
-     
-   units <= d0;
-
-
+  
 end
 
 assign LED = ledstate;
@@ -87,8 +80,6 @@ debouncer deb_4 (.CLK(CLK), .switch_input(button4), .trans_up(button4Up));
 wire sendingDone;
 
 reg [3:0] units, tens, hundreds, thousands;
-
-wire [3:0] d0;
 
 //lcd_init lcd(.CLK(CLK), .sendCommand(init_trig), .command(currentCommand), .commandDelay(commandDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
 

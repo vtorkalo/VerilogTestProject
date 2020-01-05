@@ -8,7 +8,7 @@ module lcd_init(
 );
 
 localparam TEXT_LENGTH = 6'd34;
-localparam  FREQ = 50000000;
+localparam FREQ = 26'd50000000;
 
 localparam [20:0] t1_uS = FREQ / 20'd1000000;
 localparam [20:0] t10us = t1_uS * 4'd10; 
