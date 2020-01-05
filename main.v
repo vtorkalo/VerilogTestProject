@@ -30,14 +30,6 @@ reg sendText_trig = 0;
 assign sendTextWire = button1Up;
 
 
-reg [8*2:1] char_value;
-
-initial
-begin
-//0111 1000 -x
-//0110 1111 -0
-char_value = "\n";
-end
 
 reg [8 * 34 : 1] text = "\nabcdefghijklmnop\nqrstuvwxyz123456";
 
@@ -48,12 +40,6 @@ reg ledstate = 0;
 always @(posedge CLK)
 begin
    prescaler <= prescaler + 1;
-
-//   units <= char_value[5];
-//   tens <= char_value[6];
-//   hundreds <= char_value[7];
-//   thousands <= char_value[8];
-   
 
    if (sendText_trig)
    begin   
@@ -118,7 +104,6 @@ lcd_init lcd_init(.CLK(CLK),
    .text(text),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
-   .sendingDone(sendingDone),   
-   .d0(d0));
+   .sendingDone(sendingDone));
 
 endmodule

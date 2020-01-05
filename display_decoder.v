@@ -17,7 +17,7 @@ reg [3:0] currentNumber;
 
 always @(posedge CLK)
 begin
-  counter = counter + 1;
+  counter = counter + 1'b1;
 
   if (counter == 0)
   begin

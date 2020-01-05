@@ -4,34 +4,33 @@ module lcd_init(
   input [8 * TEXT_LENGTH : 1] text,  
   output [4:0] LCD_D,
   output LCD_E,
-  output reg sendingDone,  
-  output reg [3:0] d0
+  output reg sendingDone
 );
 
 localparam TEXT_LENGTH = 34;
-localparam FREQ = 50000000;
+localparam  FREQ = 50000000;
 
-localparam t1_uS = FREQ / 1000000;
-localparam t10us = t1_uS * 10; 
-localparam t53us = t1_uS * 53;
-localparam t100us = t1_uS * 100;  
-localparam t3ms = t1_uS * 3000;
-localparam t4_1ms = t1_uS * 4100;
+localparam [20:0] t1_uS = FREQ / 1000000;
+localparam [20:0] t10us = t1_uS * 10; 
+localparam [20:0] t53us = t1_uS * 53;
+localparam [20:0] t100us = t1_uS * 100;  
+localparam [20:0] t3ms = t1_uS * 3000;
+localparam [20:0] t4_1ms = t1_uS * 4100;
 
-localparam rs1 = 5'b10000;
+localparam [4:0] rs1 = 5'b10000;
 
 reg [4:0] currentCommand = 0;
 reg [20:0] currentDelay = 0;
 
 reg isSending = 0;
 
-localparam  NOT_INIT = 0, INIT_IN_PROGRESS = 1, DONE = 2;
+localparam [1:0] NOT_INIT = 0, INIT_IN_PROGRESS = 1, DONE = 2;
 reg[1:0] initState = NOT_INIT;
 
 reg[3:0] initStep = 0;
 
 reg [5:0] currentChar = 1;
-reg highNibble = 1;
+reg highNibble = 1'b1;
 
 reg getNextCommand = 0;
 
@@ -63,7 +62,7 @@ end
 endtask
 
 wire [8:0] lowHalfStartIndex, highHalfStartIndex;
-assign lowHalfStartIndex = (TEXT_LENGTH-currentChar)*8+1;
+assign lowHalfStartIndex = (TEXT_LENGTH-currentChar)*8+1'b1;
 assign highHalfStartIndex = (TEXT_LENGTH-currentChar)*8+5;
 
 reg line = 0;
@@ -106,17 +105,14 @@ wire isLastInitStep = initStep == 13;
 
 always @(posedge CLK)
 begin
-  if (sendCommandReg)
-  begin  
-     sendCommandReg <= 0;
-  end
+  sendCommandReg <= 0;
 
   if (sendText)
   begin 
-    highNibble <= 1;
-    isSending <= 1;
-    currentChar <= 1;
-    getNextCommand <= 1;
+    highNibble <= 1'b1;
+    isSending <= 1'b1;
+    currentChar <= 1'b1;
+    getNextCommand <= 1'b1;
     line <= 0;
     
     if (initState == NOT_INIT)
@@ -138,7 +134,7 @@ begin
         getNextTextCommandTask;
      end     
      
-     sendCommandReg <= 1;
+     sendCommandReg <= 1'b1;
   end
 
   if (commandDone)
@@ -146,11 +142,11 @@ begin
      sendCommandReg <= 0;
      if (initState == INIT_IN_PROGRESS)
      begin
-        getNextCommand <= 1;
+        getNextCommand <= 1'b1;
         if (isLastInitStep) 
            initState <= DONE; 
         else
-           initStep <= initStep + 1;
+           initStep <= initStep + 1'b1;
      end else     
      if (initState == DONE)
      begin

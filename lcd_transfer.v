@@ -82,19 +82,19 @@ task increment_timers;
 begin
    if (e_timer_en)
    begin
-      e_timer <= e_timer + 1;
+      e_timer <= e_timer + 1'b1;
    end
    if (delay_timer_en)
    begin
-      delay_timer <= delay_timer + 1; 
+      delay_timer <= delay_timer + 1'b1; 
    end
    if (data_fall_timer_en)
    begin
-      data_fall_timer <= data_fall_timer + 1;
+      data_fall_timer <= data_fall_timer + 1'b1;
    end
    if (data_raise_timer_en)
    begin
-      data_raise_timer <= data_raise_timer + 1;
+      data_raise_timer <= data_raise_timer + 1'b1;
    end
 end
 endtask
@@ -109,26 +109,22 @@ localparam E_CLOCK_TIME = t1_uS * 3;
 localparam RAISE_TIME = t1_uS * 1;
 localparam FALL_TIME = t1_uS * 1;
 
-reg [7:0] index = 0;
-
-  reg [4:0] commandReg;
-  reg [20:0] commandDelayReg;
-  reg setDataBusFlag = 0;
+reg [4:0] commandReg;
+reg [20:0] commandDelayReg;
+reg setDataBusFlag = 0;
 
 always @(posedge CLK)
 begin
    increment_timers;
    
-   if (commandDone)
-   begin
-      commandDone <= 0;
-   end
-   
+   commandDone <= 0;
+      
    if (sendCommand & ~isSending)
    begin
       setDataBusFlag <= 1;
       commandReg <= command;
       commandDelayReg <= commandDelay;       
+      isSending <= 1;
    end    	
    
    if (setDataBusFlag)
@@ -136,14 +132,12 @@ begin
       setDataBusFlag <= 0;
       LCD_D <= commandReg;	       
 	   data_raise_timer_start;
-      isSending <= 1;          
    end
    
    if (data_fall_timer == FALL_TIME & isSending)
    begin
       LCD_D <= 0;
       data_fall_timer_stop;
-      index <= index + 1;
    end
    if (data_raise_timer == RAISE_TIME & isSending)
    begin
