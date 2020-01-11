@@ -36,19 +36,13 @@ assign sendTextWire = button1Up;
 
 reg [8 * 34 : 1] text = "\nabcdefghijklmnop\nqrstuvwxyz123456";
 
-reg [27:0] prescaler;
 reg textFlag = 0;
-reg ledstate = 0;
 
 always @(posedge CLK)
 begin
-   prescaler <= prescaler + 1'b1;
-
    if (sendText_trig)
-   begin   
-   sendText_trig <= 0;
+      sendText_trig <= 0;
      
-   end
    if (button1Up)
    begin      
       textFlag <= ~textFlag;
@@ -57,23 +51,8 @@ begin
        text <="\n0123456789123456\n0123456789123456";
    end
    
-   if (button2Up)
-   begin
-
-   end
-   
-   if (prescaler == 5000000)
-   begin
-      prescaler <= 0;
-      ledstate <= ~ledstate;
-   
-   end
-      
   
 end
-
-assign LED = ledstate;
-
 
 debouncer deb_1 (.CLK(CLK), .switch_input(button1), .trans_up(button1Up));
 debouncer deb_2 (.CLK(CLK), .switch_input(button2), .trans_up(button2Up));
@@ -84,7 +63,7 @@ wire sendingDone;
 
 reg [3:0] units, tens, hundreds, thousands;
 
-//lcd_init lcd(.CLK(CLK), .sendCommand(init_trig), .command(currentCommand), .commandDelay(commandDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
+
 
 display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(thousands), .DIGIT (DIGIT), .SEG(SEG));
 
