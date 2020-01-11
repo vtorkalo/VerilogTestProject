@@ -70,7 +70,7 @@ reg line = 0;
 task getNextTextCommandTask;
 begin
   if (text[lowHalfStartIndex +: 8] == "\n" & line == 0)
-  begin  
+  begin  http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_addressing/lcd_addressing_index.html
     if (highNibble)        
         currentCommand <= 5'b01000; //set cursor at 1st line beginning
      else

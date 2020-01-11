@@ -7,9 +7,12 @@ module main(
   output LED,
   
   output [4:0] LCD_D,
-  output LCD_E
-  
+  output LCD_E,
+  output reg BEEP
 );
+
+localparam FREQ = 26'd50000000;
+localparam [20:0] t1_uS = FREQ / 20'd1000000;
 
 wire button1;
 assign button1 = buttons[0];
