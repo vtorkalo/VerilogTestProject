@@ -1,18 +1,18 @@
 //display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(thousands), .DIGIT (DIGIT), .SEG(SEG));
 
 module display_decoder(
-  input CLK,
-  input [3:0] D0,
-  input [3:0] D1,
-  input [3:0] D2,
-  input [3:0] D3,
-  output reg [3:0] DIGIT,
-  output [7:0] SEG
+  input logic CLK,
+  input logic [3:0] D0,
+  input logic [3:0] D1,
+  input logic [3:0] D2,
+  input logic [3:0] D3,
+  output logic [3:0] DIGIT,
+  output logic [7:0] SEG
 );
 
-reg [15:0] counter;
-reg [3:0] digit = 4'b0001;
-reg [3:0] currentNumber;
+logic [15:0] counter;
+logic [3:0] digit = 4'b0001;
+logic [3:0] currentNumber;
 
 
 always @(posedge CLK)
@@ -39,7 +39,7 @@ begin
     endcase
 
   DIGIT <= ~(digit);
-   
+
 	 
 end
 

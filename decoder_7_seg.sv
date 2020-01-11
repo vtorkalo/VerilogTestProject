@@ -1,7 +1,7 @@
 module decoder_7_seg(
-  input CLK,
-  input [3:0] D,
-  output reg [7:0] SEG
+  input logic CLK,
+  input logic [3:0] D,
+  output logic [7:0] SEG
   );
 
 always @(posedge CLK)

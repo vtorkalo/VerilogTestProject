@@ -1,10 +1,10 @@
 module lcd_init(
-  input CLK,
-  input sendText,
-  input [8 * TEXT_LENGTH : 1] text,  
-  output [4:0] LCD_D,
-  output LCD_E,
-  output reg sendingDone
+  input logic CLK,
+  input logic sendText,
+  input logic [8 * TEXT_LENGTH : 1] text,  
+  output logic [4:0] LCD_D,
+  output logic LCD_E,
+  output logic sendingDone
 );
 
 localparam TEXT_LENGTH = 6'd34;
@@ -19,20 +19,20 @@ localparam [20:0] t4_1ms = t1_uS * 13'd4100;
 
 localparam [4:0] rs1 = 5'b10000;
 
-reg [4:0] currentCommand = 0;
-reg [20:0] currentDelay = 0;
+logic [4:0] currentCommand = 0;
+logic [20:0] currentDelay = 0;
 
-reg isSending = 0;
+logic isSending = 0;
 
 localparam [1:0] NOT_INIT = 0, INIT_IN_PROGRESS = 1, DONE = 2;
-reg[1:0] initState = NOT_INIT;
+logic[1:0] initState = NOT_INIT;
 
-reg[3:0] initStep = 0;
+logic[3:0] initStep = 0;
 
-reg [5:0] currentChar = 1;
-reg highNibble = 1'b1;
+logic [5:0] currentChar = 1;
+logic highNibble = 1'b1;
 
-reg getNextCommand = 0;
+logic getNextCommand = 0;
 
 task getNextInitCommandTask;
 begin
@@ -61,11 +61,11 @@ begin
 end
 endtask
 
-wire [8:0] lowHalfStartIndex, highHalfStartIndex;
+logic [8:0] lowHalfStartIndex, highHalfStartIndex;
 assign lowHalfStartIndex = (TEXT_LENGTH-currentChar) * 4'd8 + 1'b1;
 assign highHalfStartIndex = (TEXT_LENGTH-currentChar) * 4'd8 + 4'd5;
 
-reg line = 0;
+logic line = 0;
 
 task getNextTextCommandTask;
 begin
@@ -99,9 +99,10 @@ end
 endtask
 
 
-wire takeNewChar = ~highNibble & currentChar < TEXT_LENGTH;
-wire isLastTransfer = highNibble == 0 & currentChar == TEXT_LENGTH;
-wire isLastInitStep = initStep == 13;
+logic takeNewChar, isLastTransfer, isLastInitStep;
+assign takeNewChar = ~highNibble & currentChar < TEXT_LENGTH; 
+assign isLastTransfer = highNibble == 0 & currentChar == TEXT_LENGTH;
+assign isLastInitStep = initStep == 13;
 
 always @(posedge CLK)
 begin
@@ -159,8 +160,8 @@ begin
   end  
 end
 
-wire commandDone;
-reg sendCommandReg = 0;
+logic commandDone;
+logic sendCommandReg = 0;
 
 lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommandReg), .command(currentCommand), .commandDelay(currentDelay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
 endmodule

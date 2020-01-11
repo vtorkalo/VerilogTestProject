@@ -1,11 +1,11 @@
 module lcd_transfer(
-  input CLK,
-  input sendCommand,   
-  input [4:0] command,
-  input [20:0] commandDelay,
-  output reg [4:0] LCD_D,
-  output reg LCD_E,
-  output reg commandDone
+  input logic CLK,
+  input logic sendCommand,   
+  input logic [4:0] command,
+  input logic [20:0] commandDelay,
+  output logic [4:0] LCD_D,
+  output logic LCD_E,
+  output logic commandDone
 );
 
 localparam FREQ = 50000000;
@@ -15,17 +15,17 @@ localparam E_CLOCK_TIME = t1_uS * 3;
 localparam RAISE_TIME = t1_uS * 1;
 localparam FALL_TIME = t1_uS * 1;
 
-reg [7:0] e_timer;
-reg e_timer_en;
+logic [7:0] e_timer;
+logic e_timer_en;
 
-reg [20:0] delay_timer;
-reg delay_timer_en;
+logic [20:0] delay_timer;
+logic delay_timer_en;
 
-reg [7:0] data_fall_timer;
-reg data_fall_timer_en;
+logic [7:0] data_fall_timer;
+logic data_fall_timer_en;
 
-reg [7:0] data_raise_timer;
-reg data_raise_timer_en;
+logic [7:0] data_raise_timer;
+logic data_raise_timer_en;
 
 task data_raise_timer_start;
 begin
@@ -106,10 +106,10 @@ begin
 end
 endtask
 
-reg isSending = 0;
-reg [4:0] commandReg;
-reg [20:0] commandDelayReg;
-reg setDataBusFlag = 0;
+logic isSending = 0;
+logic [4:0] commandReg;
+logic [20:0] commandDelayReg;
+logic setDataBusFlag = 0;
 
 always @(posedge CLK)
 begin
