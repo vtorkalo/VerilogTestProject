@@ -24,8 +24,8 @@ logic [20:0] currentDelay = 0;
 
 logic isSending = 0;
 
-localparam [1:0] NOT_INIT = 0, INIT_IN_PROGRESS = 1, DONE = 2;
-logic[1:0] initState = NOT_INIT;
+typedef enum { NOT_INIT, INIT_IN_PROGRESS, DONE } init_state_type;
+init_state_type initState = NOT_INIT;
 
 logic[3:0] initStep = 0;
 
