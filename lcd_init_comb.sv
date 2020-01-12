@@ -1,5 +1,6 @@
 module lcd_init_comb(
   input logic CLK,
+  input logic RESET,
   input logic sendText,
   input logic [8 * TEXT_LENGTH : 1] text,  
   output logic [4:0] LCD_D,
@@ -47,15 +48,23 @@ begin
 end
 endtask
 
-always @(posedge CLK)
+always @(posedge CLK, posedge RESET)
 begin
-   state_reg <= state_next;  
-   initStep_reg <= initStep_next;
-   
-   currentCommand_reg <= currentCommand_next;
-   currentDelay_reg <= currentDelay_next;
-   sendCommand_tick_reg <= sendCommand_tick_next;
-   initDone <= initDone_tick;
+   if (RESET)
+   begin
+     state_reg <= not_init;
+     initStep_reg <= 1'b0;
+   end
+   else
+   begin
+      state_reg <= state_next;  
+      initStep_reg <= initStep_next;
+      
+      currentCommand_reg <= currentCommand_next;
+      currentDelay_reg <= currentDelay_next;
+      sendCommand_tick_reg <= sendCommand_tick_next;
+      initDone <= initDone_tick;
+   end
 end
 
 typedef enum bit[4:0] {not_init, send_init_command, init_done, send_high_nibble, send_low_nibble} state_type;

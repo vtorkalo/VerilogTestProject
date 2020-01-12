@@ -1,7 +1,7 @@
 module main(
   input logic CLK,
-  input logic [3:0] buttons,
-  
+  input logic RESET,
+  input logic [3:0] buttons,  
   output logic [3:0] DIGIT,
   output logic [7:0] SEG,
   output logic LED,
@@ -28,10 +28,8 @@ begin
    begin 
        
    end   
-	if (initDone)
-	begin
-		LED <= ~LED;
-	end
+
+
 end
 
 debouncer deb_1 (.CLK(CLK), .switch_input(buttons[0]), .trans_up(button1Up));
@@ -51,11 +49,12 @@ display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(tho
 
 
 lcd_init_comb lcd_init(.CLK(CLK),
+   .RESET(~RESET),
    .sendText(button1Up),
    .text("\nabcdefghijklmnop\nqrstuvwxyz123456"),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
-   .initDone(initDone));
+   .initDone(LED));
 logic reset;
 logic level;
 logic tick;
