@@ -80,6 +80,11 @@ set_location_assignment PIN_141 -to LCD_D[4]
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ENABLE_DRC_SETTINGS ON
 set_location_assignment PIN_110 -to BEEP
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name SYSTEMVERILOG_FILE tick_gen_book.sv
 set_global_assignment -name SYSTEMVERILOG_FILE pwm.sv
 set_global_assignment -name SYSTEMVERILOG_FILE main.sv
 set_global_assignment -name SYSTEMVERILOG_FILE lcd_transfer.sv
@@ -89,8 +94,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE decoder_7_seg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE debouncer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE counter.sv
 set_global_assignment -name CDF_FILE output_files/Chain2.cdf
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
-set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name SYSTEMVERILOG_FILE edge_detect_moore.sv
+set_global_assignment -name SYSTEMVERILOG_FILE edge_detect_mealy.sv
+set_global_assignment -name SYSTEMVERILOG_FILE tick_gen.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
