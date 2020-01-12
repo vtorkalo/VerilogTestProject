@@ -17,35 +17,19 @@ localparam [20:0] t1_uS = FREQ / 20'd1000000;
 
 logic button1Up, button2Up, button3Up, button4Up;
 
-logic sendText_trig = 0;
-
-
-
-reg [8 * 34 : 1] text = "\nabcdefghijklmnop\nqrstuvwxyz123456";
-
-reg textFlag = 0;
-
 assign level = button1Up;
 
 always @(posedge CLK)
 begin
-   if (sendText_trig)
-      sendText_trig <= 0;
 //   if (level)
 	//   level<=0;
-     
+   
    if (button1Up)
-   begin  
-
-      textFlag <= ~textFlag;
-      if (textFlag)
-         text <="\nabcdefghijklmnop\nqrstuvwxyz123456"; else
-       text <="\n0123456789123456\n0123456789123456";
-		 
+   begin 
+       
    end   
-	if (tick | tick2)
+	if (initDone)
 	begin
-	   sendText_trig <= 1'b1;
 		LED <= ~LED;
 	end
 end
@@ -55,7 +39,7 @@ debouncer deb_2 (.CLK(CLK), .switch_input(buttons[1]), .trans_up(button2Up));
 debouncer deb_3 (.CLK(CLK), .switch_input(buttons[2]), .trans_up(button3Up));
 debouncer deb_4 (.CLK(CLK), .switch_input(buttons[3]), .trans_up(button4Up));
 
-logic sendingDone;
+logic initDone;
 
 logic [3:0] units, tens, hundreds, thousands;
 
@@ -66,19 +50,19 @@ display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(tho
 //display_decoder decoder(.CLK(CLK), .D0(d0), .D1(d1), .D2(d2), .D3(d3), .DIGIT (DIGIT), .SEG(SEG));
 
 
-lcd_init lcd_init(.CLK(CLK),
+lcd_init_comb lcd_init(.CLK(CLK),
    .sendText(button1Up),
-   .text(text),   
+   .text("\nabcdefghijklmnop\nqrstuvwxyz123456"),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
-   .sendingDone(sendingDone));
+   .initDone(initDone));
 logic reset;
 logic level;
 logic tick;
 logic tick2;
 
 
-edge_detect_mealy mealy(.CLK(CLK), .reset(~buttons[1]), .level(~buttons[3]), .tick(tick));
+//edge_detect_mealy mealy(.CLK(CLK), .reset(~buttons[1]), .level(~buttons[3]), .tick(tick));
 //tick_gen tick_g(.CLK(CLK), .reset(~buttons[1]), .level(~buttons[3]), .tick(tick));
 //tick_gen_book tick_g_book(.CLK(CLK), .reset(~buttons[1]), .level(~buttons[3]), .tick(tick2));
 

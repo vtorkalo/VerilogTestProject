@@ -107,6 +107,7 @@ assign isLastInitStep = initStep == 13;
 always @(posedge CLK)
 begin
   sendCommandReg <= 0;
+  getNextInitCommandTask;
 
   if (sendText)
   begin 
