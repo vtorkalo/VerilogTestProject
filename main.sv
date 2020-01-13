@@ -48,13 +48,15 @@ display_decoder decoder(.CLK(CLK), .D0(units), .D1(tens), .D2(hundreds), .D3(tho
 //display_decoder decoder(.CLK(CLK), .D0(d0), .D1(d1), .D2(d2), .D3(d3), .DIGIT (DIGIT), .SEG(SEG));
 
 
-lcd_init_comb lcd_init(.CLK(CLK),
+lcd_module lcd_module(.CLK(CLK),
    .RESET(~RESET),
    .sendText(button1Up),
-   .text("\nabcdefghijklmnop\nqrstuvwxyz123456"),   
+   
+   .line1("abcdefghijklmnop"),   
+   .line2("qrstuvwxyz123456"),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
-   .initDone(LED));
+   .sendingDone(LED));
 logic reset;
 logic level;
 logic tick;

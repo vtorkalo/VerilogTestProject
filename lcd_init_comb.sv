@@ -1,14 +1,12 @@
 module lcd_init_comb(
   input logic CLK,
   input logic RESET,
-  input logic sendText,
-  input logic [8 * TEXT_LENGTH : 1] text,  
+  input logic startInit,
   output logic [4:0] LCD_D,
   output logic LCD_E,
   output logic initDone
 );
 
-localparam TEXT_LENGTH = 6'd34;
 localparam FREQ = 26'd50000000;
 
 localparam [20:0] t1_uS = FREQ / 20'd1000000;
@@ -67,7 +65,7 @@ begin
    end
 end
 
-typedef enum bit[4:0] {not_init, send_init_command, init_done, send_high_nibble, send_low_nibble} state_type;
+typedef enum bit[4:0] {not_init, send_init_command, init_done, go_line1, go_line2, send_high_nibble, send_low_nibble} state_type;
 
 logic [4:0] currentCommand_reg, currentCommand_next;
 logic [20:0] currentDelay_reg, currentDelay_next;
@@ -96,7 +94,7 @@ begin
    case (state_reg)
       not_init:
          begin
-            if (sendText)
+            if (startInit)
                state_next = send_init_command;            
          end
       send_init_command: 
@@ -117,7 +115,7 @@ begin
          end
       init_done: 
          begin
-            initDone_tick = sendText;
+            initDone_tick = startInit;
          end
    endcase
 
