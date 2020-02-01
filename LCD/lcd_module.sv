@@ -4,7 +4,8 @@ module lcd_module(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  inout [4:0] LCD_D,
+  inout [3:0] LCD_D,
+  output logic LCD_RS,
   output logic LCD_E,
   output logic LCD_RW,
   output logic sendingDone
@@ -34,11 +35,7 @@ begin
    startInit_tick = 1'b0;
    sendText_tick = 1'b0;
 
-   if (initDone)
-   begin
-   
-   end
-   
+     
    case (state_reg)
       not_init:
       begin
@@ -75,13 +72,15 @@ end
 logic startInit_tick;
 logic initDone;
 
-wire [4:0] LCD_D_init;
+wire [3:0] LCD_D_init;
 logic LCD_E_init;
 logic LCD_RW_init;
+logic LCD_RS_init;
 
-wire [4:0] LCD_D_text;
+wire [3:0] LCD_D_text;
 logic LCD_E_text;
 logic LCD_RW_text;
+logic LCD_RS_text;
 
 
 logic notInitialized;
@@ -90,6 +89,7 @@ assign notInitialized = state_reg == not_init | state_reg == send_init_command;
 assign LCD_D = notInitialized ? LCD_D_init : LCD_D_text;
 assign LCD_E = notInitialized ? LCD_E_init : LCD_E_text;
 assign LCD_RW = notInitialized ? LCD_RW_init : LCD_RW_text;
+assign LCD_RS = notInitialized ? LCD_RS_init : LCD_RS_text;
 
 
 lcd_init lcd_init(.CLK(CLK),
@@ -98,6 +98,7 @@ lcd_init lcd_init(.CLK(CLK),
    .LCD_D(LCD_D_init),
    .LCD_E(LCD_E_init),
    .LCD_RW(LCD_RW_init),
+   .LCD_RS(LCD_RS_init),
    .initDone(initDone));
 
 logic sendText_tick;
@@ -111,6 +112,7 @@ lcd_send_text lcd_text(.CLK(CLK),
    .LCD_D(LCD_D_text),
    .LCD_E(LCD_E_text),
    .LCD_RW(LCD_RW_text),
+   .LCD_RS(LCD_RS_text),
    .sendingDone(sendingDone));
    
    

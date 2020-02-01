@@ -4,9 +4,10 @@ module lcd_send_text(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  inout [4:0] LCD_D,
+  inout [3:0] LCD_D,
   output logic LCD_E,
   output logic LCD_RW,
+  output logic LCD_RS,
   output logic sendingDone
 );
 
@@ -19,7 +20,6 @@ localparam [20:0] t1_uS = FREQ / 20'd1000000;
 localparam [20:0] t10us = t1_uS * 4'd10; 
 localparam [20:0] t53us = t1_uS * 6'd53;
 
-localparam [4:0] rs1 = 5'b10000;
 
 always_ff @(posedge CLK, posedge RESET)
 begin
@@ -38,6 +38,7 @@ begin
       command_h_reg <= command_h_next;
       command_l_reg <= command_l_next;
       command_reg <= command_next;
+      command_rs_reg <= command_rs_next;
       line_reg <= line_next;
    end
 end
@@ -46,9 +47,12 @@ typedef enum bit[4:0] {idle, go_line1, go_line2, send_high_nibble, high_nibble_w
 state_type state_next, state_reg;
 
 
-logic [4:0] command_h_reg, command_l_reg, command_h_next, command_l_next, command_reg, command_next;
+logic [3:0] command_h_reg, command_l_reg, command_h_next, command_l_next, command_reg, command_next;
+logic command_rs_reg, command_rs_next;
 logic [5:0] charIndex_reg, charIndex_next;
 logic sendCommand_reg;
+logic LCD_RS_next;
+
 
 
 typedef enum bit[1:0] {line1_not_init, line1_init, line2_not_init, line2_init } line_state_type;
@@ -70,6 +74,7 @@ begin
    line_next = line_reg;
    sendingDone = 1'b0;
    command_next = command_reg;
+   command_rs_next = command_rs_reg;
    
    case (state_reg)
    idle:
@@ -79,22 +84,24 @@ begin
       end
    go_line1:
       begin
-         command_h_next = 5'b01000;
-         command_l_next = 5'b00000;
+         command_rs_next = 1'b0;
+         command_h_next = 4'b1000;
+         command_l_next = 4'b0000;
          state_next = send_high_nibble;
          line_next = line1_init;
          charIndex_next = 1'b0;
       end
    go_line2:
       begin
-        command_h_next = 5'b01100;
-        command_l_next = 5'b00000;
+        command_rs_next = 1'b0;
+        command_h_next = 4'b1100;
+        command_l_next = 4'b0000;
         state_next = send_high_nibble;
         line_next = line2_init;
         charIndex_next = 1'b0;
       end
    send_high_nibble:
-      begin
+      begin         
          command_next = command_h_reg;
          sendCommand_tick = 1'b1;
          state_next = high_nibble_wait;
@@ -107,7 +114,7 @@ begin
          end        
       end   
    send_low_nibble:
-      begin
+      begin         
          command_next = command_l_reg;
          sendCommand_tick = 1'b1;
          state_next = low_nibble_wait;
@@ -135,13 +142,15 @@ begin
            state_next = send_high_nibble;
            if (line_reg == line1_init)
            begin
-              command_h_next =  rs1 + line1[highHalfStartIndex +: 4];
-              command_l_next =  rs1 + line1[lowHalfStartIndex +: 4];
+              command_rs_next = 1'b1;
+              command_h_next = line1[highHalfStartIndex +: 4];
+              command_l_next = line1[lowHalfStartIndex +: 4];
            end else
            if (line_reg == line2_init)
            begin
-              command_h_next = rs1 + line2[highHalfStartIndex +: 4];
-              command_l_next = rs1 + line2[lowHalfStartIndex +: 4];
+              command_rs_next = 1'b1;
+              command_h_next = line2[highHalfStartIndex +: 4];
+              command_l_next = line2[lowHalfStartIndex +: 4];
            end
         end else
         begin
@@ -169,10 +178,12 @@ logic sendCommand_tick;
 lcd_transfer lcd(.CLK(CLK),
   .sendCommand(sendCommand_reg),
   .command(command_reg),
+  .command_rs(command_rs_reg),
   .commandDelay(delay),
   .commandDone(commandDone),
   .LCD_D(LCD_D),
-  .LCD_E(LCD_E),
+  .LCD_E(LCD_E),  
+  .LCD_RS(LCD_RS),
   .LCD_RW(LCD_RW));
 
 endmodule
