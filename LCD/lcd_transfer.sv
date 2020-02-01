@@ -108,6 +108,7 @@ begin
                state_next = busy;
                //read_mode = 1'b1;
                LCD_D_next = 1'b0;
+               LCD_RS_next = 1'b0;
                timer_reset = 1'b1;
             end
          end        
