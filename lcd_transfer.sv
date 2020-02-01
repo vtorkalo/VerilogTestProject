@@ -3,7 +3,7 @@ module lcd_transfer(
   input logic sendCommand,   
   input logic [4:0] command,
   input logic [20:0] commandDelay,
-  output logic [4:0] LCD_D,
+  inout [4:0] LCD_D,
   output logic LCD_E,
   output logic commandDone
 );

@@ -4,8 +4,9 @@ module lcd_send_text(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  output logic [4:0] LCD_D,
+  inout [4:0] LCD_D,
   output logic LCD_E,
+  output logic LCD_RW,
   output logic sendingDone
 );
 
@@ -156,14 +157,12 @@ begin
         end        
         
       end
-    endcase      
-//0111 
-//1000	
+    endcase
 end
 
 logic [20:0] delay;
 assign delay = state_reg == send_high_nibble | state_reg == high_nibble_wait ? t10us : 
-               state_reg == send_low_nibble | state_reg == low_nibble_wait  ? t53us: 1'b0;
+               state_reg == send_low_nibble  | state_reg == low_nibble_wait  ? t53us : 1'b0;
                
 logic sendCommand_tick;
 

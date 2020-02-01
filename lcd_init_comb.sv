@@ -2,7 +2,7 @@ module lcd_init_comb(
   input logic CLK,
   input logic RESET,
   input logic startInit,
-  output logic [4:0] LCD_D,
+  inout [4:0] LCD_D,
   output logic LCD_E,
   output logic initDone
 );

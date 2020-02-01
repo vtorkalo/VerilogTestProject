@@ -4,8 +4,9 @@ module lcd_module(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  output logic [4:0] LCD_D,
+  inout [4:0] LCD_D,
   output logic LCD_E,
+  output logic LCD_RW,
   output logic sendingDone
 );
 
@@ -74,10 +75,10 @@ end
 logic startInit_tick;
 logic initDone;
 
-logic [4:0] LCD_D_init;
+wire [4:0] LCD_D_init;
 logic LCD_E_init;
 
-logic [4:0] LCD_D_text;
+wire [4:0] LCD_D_text;
 logic LCD_E_text;
 
 logic notInitialized;

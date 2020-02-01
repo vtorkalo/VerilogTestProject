@@ -6,8 +6,11 @@ module main(
   output logic [7:0] SEG,
   output logic LED,
   
-  output logic [4:0] LCD_D,
+  inout [4:0] LCD_D,
+  output logic [3:0] LCD_D_LOW,
   output logic LCD_E,
+  output logic LCD_RW,
+  
   output logic BEEP
 );
 
@@ -56,6 +59,7 @@ lcd_module lcd_module(.CLK(CLK),
    .line2("qrstuvwxyz123456"),   
    .LCD_D(LCD_D),
    .LCD_E(LCD_E),
+   .LCD_RW(LCD_RW),
    .sendingDone(LED));
 logic reset;
 logic level;
