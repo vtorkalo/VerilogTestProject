@@ -37,10 +37,16 @@ logic [20:0] timer_reg;
 logic [20:0] timer_next;
 assign timer_next = timer_reset ? 1'b0: timer_reg + 1;
 
-typedef enum bit[3:0] {idle, data_raise, clock_e, data_fall, delay, done_tick} state_type;
+typedef enum bit[3:0] {idle, data_raise, clock_e, data_fall, busy, done_tick} state_type;
 state_type state_reg, state_next;
 
 logic store_command;
+
+logic [4:0] LCD_D_reg;
+
+logic input_mode;
+
+assign LCD_D = input_mode ? 5'bZ : LCD_D_reg;
 
 always_comb
 begin
@@ -48,7 +54,7 @@ begin
    commandDone = 1'b0;
    timer_reset = 1'b0;
    state_next = state_reg;
-   LCD_D = 1'b0;
+   LCD_D_reg = 1'b0;
    LCD_E = 1'b0;
       
    case (state_reg)
@@ -63,7 +69,7 @@ begin
          end
       data_raise:
          begin
-            LCD_D = commandReg;
+            LCD_D_reg = commandReg;
             if (timer_reg == RAISE_TIME)
             begin
                state_next = clock_e;
@@ -73,7 +79,7 @@ begin
          end
       clock_e:
          begin
-            LCD_D = commandReg;
+            LCD_D_reg = commandReg;
             LCD_E = 1'b1;
             if (timer_reg == E_CLOCK_TIME)
             begin
@@ -84,16 +90,16 @@ begin
          end         
        data_fall:
          begin
-            LCD_D = commandReg;
+            LCD_D_reg = commandReg;
             
             if (timer_reg == FALL_TIME)
             begin
-               state_next = delay;
-               LCD_D = 1'b0;
+               state_next = busy;
+               LCD_D_reg = 1'b0;
                timer_reset = 1'b1;
             end
          end        
-       delay:
+       busy:
          begin
             if (timer_reg == commandDelayReg)
             begin

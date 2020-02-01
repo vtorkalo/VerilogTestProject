@@ -92,7 +92,7 @@ assign LCD_E = notInitialized ? LCD_E_init : LCD_E_text;
 assign LCD_RW = notInitialized ? LCD_RW_init : LCD_RW_text;
 
 
-lcd_init_comb lcd_init(.CLK(CLK),
+lcd_init lcd_init(.CLK(CLK),
    .RESET(RESET),
    .startInit(startInit_tick),
    .LCD_D(LCD_D_init),

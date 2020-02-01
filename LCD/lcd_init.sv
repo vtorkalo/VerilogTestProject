@@ -1,4 +1,4 @@
-module lcd_init_comb(
+module lcd_init(
   input logic CLK,
   input logic RESET,
   input logic startInit,
