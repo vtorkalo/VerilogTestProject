@@ -77,15 +77,19 @@ logic initDone;
 
 wire [4:0] LCD_D_init;
 logic LCD_E_init;
+logic LCD_RW_init;
 
 wire [4:0] LCD_D_text;
 logic LCD_E_text;
+logic LCD_RW_text;
+
 
 logic notInitialized;
 assign notInitialized = state_reg == not_init | state_reg == send_init_command;
 
 assign LCD_D = notInitialized ? LCD_D_init : LCD_D_text;
 assign LCD_E = notInitialized ? LCD_E_init : LCD_E_text;
+assign LCD_RW = notInitialized ? LCD_RW_init : LCD_RW_text;
 
 
 lcd_init_comb lcd_init(.CLK(CLK),
@@ -93,6 +97,7 @@ lcd_init_comb lcd_init(.CLK(CLK),
    .startInit(startInit_tick),
    .LCD_D(LCD_D_init),
    .LCD_E(LCD_E_init),
+   .LCD_RW(LCD_RW_init),
    .initDone(initDone));
 
 logic sendText_tick;
@@ -105,6 +110,7 @@ lcd_send_text lcd_text(.CLK(CLK),
    .line2(line2),
    .LCD_D(LCD_D_text),
    .LCD_E(LCD_E_text),
+   .LCD_RW(LCD_RW_text),
    .sendingDone(sendingDone));
    
    

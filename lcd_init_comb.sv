@@ -4,6 +4,7 @@ module lcd_init_comb(
   input logic startInit,
   inout [4:0] LCD_D,
   output logic LCD_E,
+  output logic LCD_RW,
   output logic initDone
 );
 
@@ -123,5 +124,13 @@ end
 logic commandDone;
 logic sendCommand_tick;
 
-lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommand_tick_reg), .command(currentCommand_reg), .commandDelay(currentDelay_reg), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
+lcd_transfer lcd(.CLK(CLK),
+   .sendCommand(sendCommand_tick_reg),
+   .command(currentCommand_reg),
+   .commandDelay(currentDelay_reg),
+   .commandDone(commandDone),
+   .LCD_D(LCD_D),
+   .LCD_E(LCD_E),
+   .LCD_RW(LCD_RW));
+   
 endmodule

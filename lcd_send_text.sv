@@ -166,7 +166,13 @@ assign delay = state_reg == send_high_nibble | state_reg == high_nibble_wait ? t
                
 logic sendCommand_tick;
 
-lcd_transfer lcd(.CLK(CLK), .sendCommand(sendCommand_reg), .command(command_reg), .commandDelay(delay), .commandDone(commandDone), .LCD_D(LCD_D), .LCD_E(LCD_E));
-
+lcd_transfer lcd(.CLK(CLK),
+  .sendCommand(sendCommand_reg),
+  .command(command_reg),
+  .commandDelay(delay),
+  .commandDone(commandDone),
+  .LCD_D(LCD_D),
+  .LCD_E(LCD_E),
+  .LCD_RW(LCD_RW));
 
 endmodule
