@@ -72,34 +72,46 @@ end
 logic startInit_tick;
 logic initDone;
 
-wire [3:0] LCD_D_init;
+logic LCD_D_IN_init; 
+logic [3:0] LCD_D_init;
 logic LCD_E_init;
 logic LCD_RW_init;
 logic LCD_RS_init;
+logic READ_init;
 
-wire [3:0] LCD_D_text;
+logic LCD_D_IN_text;
+logic [3:0] LCD_D_text;
 logic LCD_E_text;
 logic LCD_RW_text;
 logic LCD_RS_text;
+logic READ_text;
 
 
 logic notInitialized;
 assign notInitialized = state_reg == not_init | state_reg == send_init_command;
 
-assign LCD_D = notInitialized ? LCD_D_init : LCD_D_text;
+assign LCD_D = notInitialized ? (READ_init ? 4'bZZZZ : LCD_D_init)
+                              : (READ_text ? 4'bZZZZ : LCD_D_text);
+                              
+assign busy_flag_init =  LCD_D[3];
+assign busy_flag_text = LCD_D[3];
+
 assign LCD_E = notInitialized ? LCD_E_init : LCD_E_text;
 assign LCD_RW = notInitialized ? LCD_RW_init : LCD_RW_text;
 assign LCD_RS = notInitialized ? LCD_RS_init : LCD_RS_text;
+
 
 
 lcd_init lcd_init(.CLK(CLK),
    .RESET(RESET),
    .startInit(startInit_tick),
    .LCD_D(LCD_D_init),
+   .busy_flag(busy_flag_init),
    .LCD_E(LCD_E_init),
    .LCD_RW(LCD_RW_init),
    .LCD_RS(LCD_RS_init),
-   .initDone(initDone));
+   .initDone(initDone),
+   .READ(READ_init));
 
 logic sendText_tick;
 
@@ -110,9 +122,11 @@ lcd_send_text lcd_text(.CLK(CLK),
    .line1(line1),
    .line2(line2),
    .LCD_D(LCD_D_text),
+   .busy_flag(busy_flag_text),
    .LCD_E(LCD_E_text),
    .LCD_RW(LCD_RW_text),
    .LCD_RS(LCD_RS_text),
+   .READ(READ_text),
    .sendingDone(sendingDone));
    
    

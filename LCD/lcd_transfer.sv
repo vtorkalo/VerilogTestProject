@@ -4,7 +4,10 @@ module lcd_transfer(
   input logic [3:0] command,
   input logic command_rs,
   input logic [20:0] commandDelay,
-  inout [3:0] LCD_D,
+  input logic busy_flag,
+  input logic read_busy,
+  output [3:0] LCD_D,
+  output logic READ,
   output logic LCD_RW,  
   output logic LCD_E,
   output logic LCD_RS,
@@ -15,8 +18,8 @@ localparam FREQ = 50000000;
 localparam t1_uS = FREQ / 1000000;
 
 localparam E_CLOCK_TIME = t1_uS * 3;
-localparam RAISE_TIME = t1_uS * 1;
-localparam FALL_TIME = t1_uS * 1;
+localparam RAISE_TIME = t1_uS * 10;
+localparam FALL_TIME = t1_uS * 10;
 
 
 always_ff @(posedge CLK)
@@ -26,6 +29,7 @@ begin
    begin
       commandReg <= command;
       commandRsReg <= command_rs;
+      read_busy_reg <= read_busy;
    end
    state_reg <= state_next;
    LCD_D_reg <= LCD_D_next;
@@ -53,7 +57,9 @@ logic LCD_E_next, LCD_RS_next;
 
 assign LCD_RW = read_mode_reg;
 logic read_mode_reg, read_mode_next;
-assign LCD_D = read_mode_reg ? 4'bZ : LCD_D_reg;
+assign LCD_D = read_mode_reg ? 4'bZZZZ : LCD_D_reg;
+assign READ = read_mode_reg;
+logic read_busy_reg;
 
 always_comb
 begin
@@ -61,7 +67,6 @@ begin
    commandDone = 1'b0;
    timer_reset = 1'b0;
    state_next = state_reg;
-   LCD_D_next = LCD_D_reg;
    LCD_E_next = LCD_E;   
    LCD_RS_next = LCD_RS;
    LCD_D_next = LCD_D_reg;
@@ -106,41 +111,60 @@ begin
             
             if (timer_reg == FALL_TIME)
             begin
-               state_next = read_data_raise;
-               read_mode_next = 1'b1;
-               //LCD_D_next = 1'b0;
-               LCD_RS_next = 1'b0;
-               timer_reset = 1'b1;
+               if (read_busy_reg)
+               begin
+                  state_next = read_data_raise;
+                  read_mode_next = 1'b1;
+                  LCD_D_next = 1'b0;
+                  LCD_RS_next = 1'b0;
+                  timer_reset = 1'b1;
+               end
+               else
+               begin
+                 state_next = done_tick;
+                 read_mode_next = 1'b0;
+                 commandDone = 1'b1;               
+               end
             end
          end        
        read_data_raise:
          begin
+            read_mode_next = 1'b1;
+            LCD_E_next = 1'b0;
             if (timer_reg == RAISE_TIME)
             begin
                timer_reset = 1'b1;
-               //LCD_E_next = 1'b1;
+               LCD_E_next = 1'b1;
                state_next = read_data_clock_e;
             end
          end
         read_data_clock_e:
-         begin            
-            LCD_E_next = 1'b1;
+         begin
+
             if (timer_reg == E_CLOCK_TIME)
             begin
-               state_next = read_data_fall;
-               LCD_E_next = 1'b0;
-               timer_reset = 1'b1;
+            
+              if (!busy_flag)
+              begin
+                 state_next = done_tick;
+                 read_mode_next = 1'b0;
+                 commandDone = 1'b1;
+              end
+              else   
+              begin         
+                 LCD_E_next = 1'b0;
+                 state_next = read_data_raise;                 
+                 timer_reset = 1'b1;
+              end
             end
          end         
        read_data_fall:
        begin
-          if (timer_reg == FALL_TIME && !LCD_D[3])
-          begin
-             state_next = done_tick;
-          end       
+         
        end
        done_tick:
          begin
+            LCD_E_next = 1'b0;
             commandDone = 1'b0;
             state_next = idle;
          end

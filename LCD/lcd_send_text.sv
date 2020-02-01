@@ -4,11 +4,13 @@ module lcd_send_text(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  inout [3:0] LCD_D,
+  input logic busy_flag,
+  output logic [3:0] LCD_D, 
   output logic LCD_E,
   output logic LCD_RW,
   output logic LCD_RS,
-  output logic sendingDone
+  output logic sendingDone,
+  output logic READ
 );
 
 
@@ -40,6 +42,7 @@ begin
       command_reg <= command_next;
       command_rs_reg <= command_rs_next;
       line_reg <= line_next;
+      read_busy_reg <= read_busy_next;
    end
 end
 
@@ -52,6 +55,7 @@ logic command_rs_reg, command_rs_next;
 logic [5:0] charIndex_reg, charIndex_next;
 logic sendCommand_reg;
 logic LCD_RS_next;
+logic read_busy_next, read_busy_reg;
 
 
 
@@ -75,6 +79,7 @@ begin
    sendingDone = 1'b0;
    command_next = command_reg;
    command_rs_next = command_rs_reg;
+   read_busy_next = read_busy_reg;
    
    case (state_reg)
    idle:
@@ -83,7 +88,7 @@ begin
             state_next = go_line1;      
       end
    go_line1:
-      begin
+      begin         
          command_rs_next = 1'b0;
          command_h_next = 4'b1000;
          command_l_next = 4'b0000;
@@ -101,7 +106,8 @@ begin
         charIndex_next = 1'b0;
       end
    send_high_nibble:
-      begin         
+      begin
+         read_busy_next = 1'b0;
          command_next = command_h_reg;
          sendCommand_tick = 1'b1;
          state_next = high_nibble_wait;
@@ -114,7 +120,8 @@ begin
          end        
       end   
    send_low_nibble:
-      begin         
+      begin
+         read_busy_next = 1'b1;   
          command_next = command_l_reg;
          sendCommand_tick = 1'b1;
          state_next = low_nibble_wait;
@@ -182,8 +189,11 @@ lcd_transfer lcd(.CLK(CLK),
   .commandDelay(delay),
   .commandDone(commandDone),
   .LCD_D(LCD_D),
+  .read_busy(read_busy_reg),
+  .busy_flag(busy_flag),
   .LCD_E(LCD_E),  
   .LCD_RS(LCD_RS),
-  .LCD_RW(LCD_RW));
+  .LCD_RW(LCD_RW),
+  .READ(READ));
 
 endmodule

@@ -2,11 +2,13 @@ module lcd_init(
   input logic CLK,
   input logic RESET,
   input logic startInit,
-  inout [3:0] LCD_D,
+  input logic busy_flag,
+  output logic [3:0] LCD_D, 
   output logic LCD_E,
   output logic LCD_RW,
   output logic LCD_RS,
-  output logic initDone
+  output logic initDone,
+  output logic READ
 );
 
 localparam FREQ = 26'd50000000;
@@ -23,25 +25,25 @@ begin
   //http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html   
   LCD_RS_next = 1'b0;
   case (initStep_reg)
-     0:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t4_1ms;  end
-     1:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us;  end
-     2:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us;  end
-     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us;  end        
+     0:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t4_1ms; read_busy_next = 1'b1;  end
+     1:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1;  end
+     2:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1;  end
+     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us; read_busy_next = 1'b1;  end        
      
-     4:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t10us;   end             
-     5:  begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us;   end // function set 
+     4:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t10us; read_busy_next = 1'b0;   end             
+     5:  begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;   end // function set 
      
-     6:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us;   end     
-     7:  begin  currentCommand_next = 4'b1000;  currentDelay_next = t53us;   end // display on off control        
+     6:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end     
+     7:  begin  currentCommand_next = 4'b1000;  currentDelay_next = t53us; read_busy_next = 1'b1;   end // display on off control        
      
-     8:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us;   end
-     9:  begin  currentCommand_next = 4'b0001;  currentDelay_next = t3ms;    end // clear display
+     8:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
+     9:  begin  currentCommand_next = 4'b0001;  currentDelay_next = t3ms; read_busy_next = 1'b1;   end // clear display
                 
-     10: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us;   end
-     11: begin  currentCommand_next = 4'b0110;  currentDelay_next = t53us;   end// entry mode sed id and s
+     10: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
+     11: begin  currentCommand_next = 4'b0110;  currentDelay_next = t53us; read_busy_next = 1'b1;   end// entry mode sed id and s
         
-     12: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us;   end
-     13: begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us;   end// set blink cursor display on off control set d=1 b and c           
+     12: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
+     13: begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;   end// set blink cursor display on off control set d=1 b and c           
   endcase
 end
 endtask
@@ -62,6 +64,7 @@ begin
       currentDelay_reg <= currentDelay_next;
       sendCommand_tick_reg <= sendCommand_tick_next;
       initDone <= initDone_tick;
+      read_busy_reg <= read_busy_next;
       LCD_RS <= LCD_RS_next;
    end
 end
@@ -80,6 +83,7 @@ logic [3:0] initStep_reg, initStep_next;
 logic getNextInitStep;
 logic initDone_tick;
 logic LCD_RS_next;
+logic read_busy_reg, read_busy_next;
 
 
 always_comb
@@ -93,6 +97,7 @@ begin
 
    sendCommand_tick_next = 1'b0;
    initDone_tick = 1'b0;
+   read_busy_next = read_busy_reg;
   
    case (state_reg)
       not_init:
@@ -131,8 +136,11 @@ lcd_transfer lcd(.CLK(CLK),
    .command(currentCommand_reg),
    .commandDelay(currentDelay_reg),
    .commandDone(commandDone),
+   .read_busy(read_busy_reg),
    .LCD_D(LCD_D),
+   .busy_flag(busy_flag),
    .LCD_E(LCD_E),
-   .LCD_RW(LCD_RW));
+   .LCD_RW(LCD_RW),
+   .READ(READ));
    
 endmodule
