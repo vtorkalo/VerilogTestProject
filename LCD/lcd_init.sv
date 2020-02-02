@@ -28,7 +28,7 @@ begin
      0:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t4_1ms; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
      1:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
      2:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
-     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0; end        
+     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b1; end        
      
      4:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t10us; read_busy_next = 1'b0;  mode4bit_next = 1'b1;  end             
      5:  begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;  mode4bit_next = 1'b1; end // function set 

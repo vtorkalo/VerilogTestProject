@@ -76,10 +76,8 @@ set_location_assignment PIN_2 -to LCD_D[0]
 set_location_assignment PIN_10 -to LCD_D[1]
 set_location_assignment PIN_7 -to LCD_D[2]
 set_location_assignment PIN_11 -to LCD_D[3]
-set_location_assignment PIN_141 -to LCD_D[4]
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name ENABLE_DRC_SETTINGS ON
-set_location_assignment PIN_110 -to BEEP
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
@@ -105,4 +103,5 @@ set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name SYSTEMVERILOG_FILE edge_detect_moore.sv
 set_global_assignment -name SYSTEMVERILOG_FILE edge_detect_mealy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE tick_gen.sv
+set_location_assignment PIN_141 -to LCD_RS
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
