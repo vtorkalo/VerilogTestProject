@@ -154,7 +154,7 @@ begin
               timer_reset = 1'b1;
               if (!busy_flag)
               begin
-                 if (mode4bit_reg)
+                 if (!mode4bit_reg)
                  begin
                     state_next = done_tick;
                     read_mode_next = 1'b0;
@@ -166,7 +166,7 @@ begin
                  busy_next = 1'b0;          
               end else
               begin
-                 if (mode4bit_reg)
+                 if (!mode4bit_reg)
                  begin                 
                     state_next = read_data_raise;
                  end
