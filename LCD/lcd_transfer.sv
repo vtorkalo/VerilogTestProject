@@ -3,7 +3,6 @@ module lcd_transfer(
   input logic sendCommand,   
   input logic [3:0] command,
   input logic command_rs,
-  input logic [20:0] commandDelay,
   input logic busy_flag,
   input logic read_busy,
   input logic mode4bit,
@@ -46,8 +45,8 @@ logic [3:0] commandReg;
 logic commandRsReg;
 
 logic timer_reset;
-logic [20:0] timer_reg;
-logic [20:0] timer_next;
+logic [7:0] timer_reg;
+logic [7:0] timer_next;
 assign timer_next = timer_reset ? 1'b0: timer_reg + 1'b1;
 
 typedef enum bit[3:0] {idle, data_raise, clock_e, data_fall, read_data_raise, read_data_clock_e, read_data_fall, read_data_raise2, read_data_clock_e2, read_data_fall2,done_tick} state_type;

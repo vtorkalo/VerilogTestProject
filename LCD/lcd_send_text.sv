@@ -15,14 +15,6 @@ module lcd_send_text(
 
 
 localparam LINE_LENGTH = 5'd16;
-localparam FREQ = 26'd50000000;
-
-
-localparam [20:0] t1_uS = FREQ / 20'd1000000;
-localparam [20:0] t10us = t1_uS * 4'd10; 
-localparam [20:0] t53us = t1_uS * 6'd53;
-
-
 always_ff @(posedge CLK, posedge RESET)
 begin
    if (RESET)
@@ -176,17 +168,13 @@ begin
     endcase
 end
 
-logic [20:0] delay;
-assign delay = state_reg == send_high_nibble | state_reg == high_nibble_wait ? t10us : 
-               state_reg == send_low_nibble  | state_reg == low_nibble_wait  ? t53us : 1'b0;
-               
+              
 logic sendCommand_tick;
 
 lcd_transfer lcd(.CLK(CLK),
   .sendCommand(sendCommand_reg),
   .command(command_reg),
   .command_rs(command_rs_reg),
-  .commandDelay(delay),
   .commandDone(commandDone),
   .LCD_D(LCD_D),
   .read_busy(read_busy_reg),
