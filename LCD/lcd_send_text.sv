@@ -192,6 +192,7 @@ lcd_transfer lcd(.CLK(CLK),
   .read_busy(read_busy_reg),
   .busy_flag(busy_flag),
   .LCD_E(LCD_E),  
+  .mode4bit(1'b1),
   .LCD_RS(LCD_RS),
   .LCD_RW(LCD_RW),
   .READ(READ));

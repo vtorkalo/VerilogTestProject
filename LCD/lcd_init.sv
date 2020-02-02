@@ -25,25 +25,25 @@ begin
   //http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html   
   LCD_RS_next = 1'b0;
   case (initStep_reg)
-     0:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t4_1ms; read_busy_next = 1'b1;  end
-     1:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1;  end
-     2:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1;  end
-     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us; read_busy_next = 1'b1;  end        
+     0:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t4_1ms; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
+     1:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
+     2:  begin  currentCommand_next = 4'b0011;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0;  end
+     3:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t100us; read_busy_next = 1'b1; mode4bit_next = 1'b0; end        
      
-     4:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t10us; read_busy_next = 1'b0;   end             
-     5:  begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;   end // function set 
+     4:  begin  currentCommand_next = 4'b0010;  currentDelay_next = t10us; read_busy_next = 1'b0;  mode4bit_next = 1'b1;  end             
+     5:  begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;  mode4bit_next = 1'b1; end // function set 
      
-     6:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end     
-     7:  begin  currentCommand_next = 4'b1000;  currentDelay_next = t53us; read_busy_next = 1'b1;   end // display on off control        
+     6:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;  mode4bit_next = 1'b1; end     
+     7:  begin  currentCommand_next = 4'b1000;  currentDelay_next = t53us; read_busy_next = 1'b1;  mode4bit_next = 1'b1; end // display on off control        
      
-     8:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
-     9:  begin  currentCommand_next = 4'b0001;  currentDelay_next = t3ms; read_busy_next = 1'b1;   end // clear display
+     8:  begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0; mode4bit_next = 1'b1;  end
+     9:  begin  currentCommand_next = 4'b0001;  currentDelay_next = t3ms; read_busy_next = 1'b1;  mode4bit_next = 1'b1; end // clear display
                 
-     10: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
-     11: begin  currentCommand_next = 4'b0110;  currentDelay_next = t53us; read_busy_next = 1'b1;   end// entry mode sed id and s
+     10: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0; mode4bit_next = 1'b1;  end
+     11: begin  currentCommand_next = 4'b0110;  currentDelay_next = t53us; read_busy_next = 1'b1; mode4bit_next = 1'b1;  end// entry mode sed id and s
         
-     12: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;   end
-     13: begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;   end// set blink cursor display on off control set d=1 b and c           
+     12: begin  currentCommand_next = 4'b0000;  currentDelay_next = t10us; read_busy_next = 1'b0;  mode4bit_next = 1'b1; end
+     13: begin  currentCommand_next = 4'b1100;  currentDelay_next = t53us; read_busy_next = 1'b1;  mode4bit_next = 1'b1; end// set blink cursor display on off control set d=1 b and c           
   endcase
 end
 endtask
@@ -66,6 +66,7 @@ begin
       initDone <= initDone_tick;
       read_busy_reg <= read_busy_next;
       LCD_RS <= LCD_RS_next;
+      mode4bit_reg <= mode4bit_next;
    end
 end
 
@@ -91,6 +92,7 @@ begin
    LCD_RS_next = LCD_RS;
    state_next = state_reg;
    initStep_next = initStep_reg;
+   mode4bit_next = mode4bit_reg;
   
    currentCommand_next = currentCommand_reg;
    currentDelay_next = currentDelay_reg;
@@ -130,6 +132,7 @@ begin
 end
 logic commandDone;
 logic sendCommand_tick;
+logic mode4bit_reg, mode4bit_next;
 
 lcd_transfer lcd(.CLK(CLK),
    .sendCommand(sendCommand_tick_reg),
@@ -138,6 +141,7 @@ lcd_transfer lcd(.CLK(CLK),
    .commandDone(commandDone),
    .read_busy(read_busy_reg),
    .LCD_D(LCD_D),
+   .mode4bit(mode4bit_reg),
    .busy_flag(busy_flag),
    .LCD_E(LCD_E),
    .LCD_RW(LCD_RW),

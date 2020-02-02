@@ -6,6 +6,7 @@ module lcd_transfer(
   input logic [20:0] commandDelay,
   input logic busy_flag,
   input logic read_busy,
+  input logic mode4bit,
   output [3:0] LCD_D,
   output logic READ,
   output logic LCD_RW,  
@@ -17,9 +18,9 @@ module lcd_transfer(
 localparam FREQ = 50000000;
 localparam t1_uS = FREQ / 1000000;
 
-localparam E_CLOCK_TIME = t1_uS * 3;
-localparam RAISE_TIME = t1_uS * 10;
-localparam FALL_TIME = t1_uS * 10;
+localparam E_CLOCK_TIME = t1_uS * 10;
+localparam RAISE_TIME = t1_uS * 30;
+localparam FALL_TIME = t1_uS * 30;
 
 
 always_ff @(posedge CLK)
@@ -30,12 +31,14 @@ begin
       commandReg <= command;
       commandRsReg <= command_rs;
       read_busy_reg <= read_busy;
+      mode4bit_reg <= mode4bit;
    end
    state_reg <= state_next;
    LCD_D_reg <= LCD_D_next;
    LCD_E <= LCD_E_next;
    LCD_RS <= LCD_RS_next;
    read_mode_reg <= read_mode_next;   
+   busy_reg <= busy_next;
 end
 
 
@@ -47,7 +50,7 @@ logic [20:0] timer_reg;
 logic [20:0] timer_next;
 assign timer_next = timer_reset ? 1'b0: timer_reg + 1'b1;
 
-typedef enum bit[3:0] {idle, data_raise, clock_e, data_fall, read_data_raise, read_data_clock_e, read_data_fall, done_tick} state_type;
+typedef enum bit[3:0] {idle, data_raise, clock_e, data_fall, read_data_raise, read_data_clock_e, read_data_fall, read_data_raise2, read_data_clock_e2, read_data_fall2,done_tick} state_type;
 state_type state_reg, state_next;
 
 logic store_command;
@@ -60,6 +63,8 @@ logic read_mode_reg, read_mode_next;
 assign LCD_D = read_mode_reg ? 4'bZZZZ : LCD_D_reg;
 assign READ = read_mode_reg;
 logic read_busy_reg;
+logic busy_reg, busy_next;
+logic mode4bit_reg;
 
 always_comb
 begin
@@ -71,12 +76,14 @@ begin
    LCD_RS_next = LCD_RS;
    LCD_D_next = LCD_D_reg;
    read_mode_next = read_mode_reg;
+   busy_next = busy_reg;
          
    case (state_reg)
       idle:
          begin
             if (sendCommand)
-            begin               
+            begin
+               busy_next = 1'b1;
                store_command = 1'b1;   
                state_next = data_raise;
                timer_reset = 1'b1;
@@ -143,8 +150,54 @@ begin
 
             if (timer_reg == E_CLOCK_TIME)
             begin
-            
+              LCD_E_next = 1'b0;
+              timer_reset = 1'b1;
               if (!busy_flag)
+              begin
+                 if (mode4bit_reg)
+                 begin
+                    state_next = done_tick;
+                    read_mode_next = 1'b0;
+                    commandDone = 1'b1;
+                 end else
+                 begin
+                    state_next = read_data_raise2;
+                 end
+                 busy_next = 1'b0;          
+              end else
+              begin
+                 if (mode4bit_reg)
+                 begin                 
+                    state_next = read_data_raise;
+                 end
+                 else
+                 begin
+                    state_next = read_data_raise2;
+                 end
+              end
+            end
+         end         
+       read_data_fall:
+       begin
+         
+       end
+       read_data_raise2:
+         begin
+//            read_mode_next = 1'b1;
+  
+            if (timer_reg == RAISE_TIME)
+            begin
+               timer_reset = 1'b1;
+               LCD_E_next = 1'b1;
+               state_next = read_data_clock_e2;
+            end
+         end
+        read_data_clock_e2:
+         begin
+
+            if (timer_reg == E_CLOCK_TIME)
+            begin
+              if (!busy_reg)
               begin
                  state_next = done_tick;
                  read_mode_next = 1'b0;
@@ -158,7 +211,7 @@ begin
               end
             end
          end         
-       read_data_fall:
+       read_data_fall2:
        begin
          
        end
