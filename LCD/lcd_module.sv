@@ -85,7 +85,7 @@ lcd_init lcd_init(.CLK(CLK),
    .mode4bit(mode4bit_init),
    .sendCommand_tick(sendCommand_tick_init)
 );
-logic commandToSend_init;
+logic [3:0] commandToSend_init;
 logic sendCommand_tick_init;
 logic mode4bit_init;
 logic sendText_tick;
@@ -93,7 +93,7 @@ logic read_busy_init;
 logic command_rs_init;
 logic send_command_tick_init;
 
-logic commandToSend_text;
+logic [3:0] commandToSend_text;
 lcd_send_text lcd_text(.CLK(CLK),
    .RESET(RESET),
    .sendText(sendText_tick),
@@ -115,14 +115,14 @@ logic mode4bit;
 logic command_rs_text;
 
 
-assign mode4bit = notInitialized ? mode4bit_init : 1'b0;
+assign mode4bit = notInitialized ? mode4bit_init : 1'b1;
 
 logic transferCommand;
 assign tranferCommand = notInitialized ? sendCommand_tick_init : sendCommand_tick_text;
 logic read_busy;
 assign read_busy = notInitialized ? read_busy_init : read_busy_text;
 
-logic commandToTransfer;
+logic [3:0] commandToTransfer;
 assign commandToTransfer = notInitialized ? commandToSend_init : commandToSend_text;
 logic transferCommand_tick;
 assign transferCommand_tick = notInitialized ? sendCommand_tick_init : sendCommand_tick_text;

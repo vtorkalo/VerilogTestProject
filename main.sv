@@ -19,7 +19,6 @@ localparam [20:0] t1_uS = FREQ / 20'd1000000;
 
 logic button1Up, button2Up, button3Up, button4Up;
 
-assign level = button1Up;
 
 always @(posedge CLK)
 begin
