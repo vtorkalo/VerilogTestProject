@@ -62,7 +62,6 @@ lcd_module lcd_module(.CLK(CLK),
    .LCD_RW(LCD_RW),
    .sendingDone(LED));
 logic reset;
-logic level;
 logic tick;
 logic tick2;
 

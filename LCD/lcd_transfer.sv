@@ -2,12 +2,10 @@ module lcd_transfer(
   input logic CLK,
   input logic sendCommand,   
   input logic [3:0] command,
-  input logic command_rs,
-  input logic busy_flag,
+  input logic command_rs,  
   input logic read_busy,
   input logic mode4bit,
-  output [3:0] LCD_D,
-  output logic READ,
+  inout [3:0] LCD_D,
   output logic LCD_RW,  
   output logic LCD_E,
   output logic LCD_RS,
@@ -20,6 +18,9 @@ localparam t1_uS = FREQ / 1000000;
 localparam E_CLOCK_TIME = t1_uS * 1;
 localparam RAISE_TIME = t1_uS * 2;
 localparam FALL_TIME = t1_uS * 2;
+
+logic busy_flag;
+assign busy_flag = LCD_D[3];
 
 
 always_ff @(posedge CLK)
@@ -60,7 +61,6 @@ logic LCD_E_next, LCD_RS_next;
 assign LCD_RW = read_mode_reg;
 logic read_mode_reg, read_mode_next;
 assign LCD_D = read_mode_reg ? 4'bZZZZ : LCD_D_reg;
-assign READ = read_mode_reg;
 logic read_busy_reg;
 logic busy_reg, busy_next;
 logic mode4bit_reg;

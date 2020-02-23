@@ -4,15 +4,20 @@ module lcd_send_text(
   input logic sendText,
   input logic [8 * LINE_LENGTH : 1] line1,
   input logic [8 * LINE_LENGTH : 1] line2,
-  input logic busy_flag,
-  output logic [3:0] LCD_D, 
-  output logic LCD_E,
-  output logic LCD_RW,
-  output logic LCD_RS,
+  
   output logic sendingDone,
-  output logic READ
+  
+   
+  input logic commandDone,
+  output logic [3:0] commandToSend,
+  output logic sendCommand_tick,
+  output logic read_busy,
+  output logic commandToSendRs
 );
 
+assign commandToSend = command_reg;
+assign read_busy = read_busy_reg;
+assign commandToSendRs = command_rs_reg;
 
 localparam LINE_LENGTH = 5'd16;
 always_ff @(posedge CLK, posedge RESET)
@@ -46,9 +51,7 @@ logic [3:0] command_h_reg, command_l_reg, command_h_next, command_l_next, comman
 logic command_rs_reg, command_rs_next;
 logic [5:0] charIndex_reg, charIndex_next;
 logic sendCommand_reg;
-logic LCD_RS_next;
 logic read_busy_next, read_busy_reg;
-
 
 
 typedef enum bit[1:0] {line1_not_init, line1_init, line2_not_init, line2_init } line_state_type;
@@ -168,21 +171,5 @@ begin
     endcase
 end
 
-              
-logic sendCommand_tick;
-
-lcd_transfer lcd(.CLK(CLK),
-  .sendCommand(sendCommand_reg),
-  .command(command_reg),
-  .command_rs(command_rs_reg),
-  .commandDone(commandDone),
-  .LCD_D(LCD_D),
-  .read_busy(read_busy_reg),
-  .busy_flag(busy_flag),
-  .LCD_E(LCD_E),  
-  .mode4bit(1'b1),
-  .LCD_RS(LCD_RS),
-  .LCD_RW(LCD_RW),
-  .READ(READ));
 
 endmodule

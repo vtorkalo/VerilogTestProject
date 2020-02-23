@@ -2,20 +2,23 @@ module lcd_init(
   input logic CLK,
   input logic RESET,
   input logic startInit,
-  input logic busy_flag,
-  output logic [3:0] LCD_D, 
-  output logic LCD_E,
-  output logic LCD_RW,
-  output logic LCD_RS,
   output logic initDone,
-  output logic READ
+  
+  input logic commandDone,
+  output logic [3:0] commandToSend,
+  output logic sendCommand_tick,
+  output logic mode4bit,
+  output logic read_busy
 );
 
+assign commandToSend = currentCommand_reg;
+assign mode4bit = mode4bit_reg;
+assign read_busy = read_busy_reg;
+assign sendCommand_tick = sendCommand_tick_reg;
 
 task getNextInitCommandTask;
 begin
   //http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html   
-  LCD_RS_next = 1'b0;
   case (initStep_reg)
      0:  begin  currentCommand_next = 4'b0011;   read_busy_next = 1'b1;  mode4bit_next = 1'b0;  end
      1:  begin  currentCommand_next = 4'b0011;   read_busy_next = 1'b1;  mode4bit_next = 1'b0;  end
@@ -56,7 +59,6 @@ begin
       sendCommand_tick_reg <= sendCommand_tick_next;
       initDone <= initDone_tick;
       read_busy_reg <= read_busy_next;
-      LCD_RS <= LCD_RS_next;
       mode4bit_reg <= mode4bit_next;
    end
 end
@@ -73,13 +75,11 @@ logic [3:0] initStep_reg, initStep_next;
 
 logic getNextInitStep;
 logic initDone_tick;
-logic LCD_RS_next;
 logic read_busy_reg, read_busy_next;
 
 
 always_comb
 begin
-   LCD_RS_next = LCD_RS;
    state_next = state_reg;
    initStep_next = initStep_reg;
    mode4bit_next = mode4bit_reg;
@@ -119,20 +119,7 @@ begin
    endcase
 
 end
-logic commandDone;
-logic sendCommand_tick;
-logic mode4bit_reg, mode4bit_next;
 
-lcd_transfer lcd(.CLK(CLK),
-   .sendCommand(sendCommand_tick_reg),
-   .command(currentCommand_reg),
-   .commandDone(commandDone),
-   .read_busy(read_busy_reg),
-   .LCD_D(LCD_D),
-   .mode4bit(mode4bit_reg),
-   .busy_flag(busy_flag),
-   .LCD_E(LCD_E),
-   .LCD_RW(LCD_RW),
-   .READ(READ));
-   
+logic mode4bit_reg, mode4bit_next;
+  
 endmodule
