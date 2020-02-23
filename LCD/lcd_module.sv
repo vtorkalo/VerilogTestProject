@@ -35,7 +35,6 @@ begin
    startInit_tick = 1'b0;
    sendText_tick = 1'b0;
 
-     
    case (state_reg)
       not_init:
       begin
@@ -92,6 +91,7 @@ logic mode4bit_init;
 logic sendText_tick;
 logic read_busy_init;
 logic command_rs_init;
+logic send_command_tick_init;
 
 logic commandToSend_text;
 lcd_send_text lcd_text(.CLK(CLK),
@@ -104,9 +104,10 @@ lcd_send_text lcd_text(.CLK(CLK),
    .commandToSendRs(command_rs_text),
    .sendingDone(sendingDone),
    .commandDone(commandTransferDone),
-   .sendCommand_tick(sendCommand_tick_text)
-   
-);
+   .sendCommand_reg(sendCommand_tick_text)
+   );
+
+logic send_command_tick_text;
 logic read_busy_text;
 logic sendCommand_tick_text;
 logic commandTransferDone;

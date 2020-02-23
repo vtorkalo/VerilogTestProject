@@ -10,14 +10,16 @@ module lcd_send_text(
    
   input logic commandDone,
   output logic [3:0] commandToSend,
-  output logic sendCommand_tick,
+  output logic sendCommand_reg,
   output logic read_busy,
   output logic commandToSendRs
 );
 
+
 assign commandToSend = command_reg;
 assign read_busy = read_busy_reg;
 assign commandToSendRs = command_rs_reg;
+logic sendCommand_tick;
 
 localparam LINE_LENGTH = 5'd16;
 always_ff @(posedge CLK, posedge RESET)
@@ -50,7 +52,6 @@ state_type state_next, state_reg;
 logic [3:0] command_h_reg, command_l_reg, command_h_next, command_l_next, command_reg, command_next;
 logic command_rs_reg, command_rs_next;
 logic [5:0] charIndex_reg, charIndex_next;
-logic sendCommand_reg;
 logic read_busy_next, read_busy_reg;
 
 
